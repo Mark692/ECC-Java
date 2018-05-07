@@ -54,7 +54,7 @@ public class input_RSA_Crypt extends Menu_RSA
 		BigInteger encrypted = rsa_crypt.crypt_message();
 		String decrypted = rsa_crypt.decrypt_message(encrypted);
 		
-		this.printParams(rsa_crypt.get_rsa());
+		rsa_crypt.get_rsa();
 		System.out.println("Your input text: "+text);
 		System.out.println("Its encryption: "+encrypted);
 		System.out.println("Final check. The decryption of the latter string is: "+decrypted);

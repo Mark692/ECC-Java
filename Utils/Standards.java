@@ -26,6 +26,7 @@ public class Standards
 	 */
 	public static BigInteger modular_sqrt(BigInteger toRoot, BigInteger modulo)
 	{
+		//modulo = 3 mod(4)
 		if(modulo.mod(BigInteger.valueOf(4)).compareTo(BigInteger.valueOf(3)) == 0)
 		{
 			BigInteger u = (modulo.subtract(BigInteger.valueOf(3))).divide(BigInteger.valueOf(4));
@@ -39,6 +40,7 @@ public class Standards
 			return null;
 		}
 		
+		//modulo = 5 mod(8)
 		else if(modulo.mod(BigInteger.valueOf(8)).compareTo(BigInteger.valueOf(5)) == 0)
 		{
 			BigInteger u = (modulo.subtract(BigInteger.valueOf(5))).divide(BigInteger.valueOf(8));
@@ -54,6 +56,7 @@ public class Standards
 			return null;
 		}
 		
+		//modulo = 1 mod(4)
 		else if(modulo.mod(BigInteger.valueOf(4)).compareTo(BigInteger.valueOf(1)) == 0)
 		{
 			BigInteger Q = toRoot;

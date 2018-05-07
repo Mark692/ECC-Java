@@ -103,7 +103,6 @@ public class RSA
 
 		int percent10 = n_bitlen / 10; //10% of n length
 		int percent45 = (n_bitlen * 45 ) / 100; //45% of n length. This is better than 40%
-//		int percent40 = (n_bitsize * 2 ) / 5; //40% of n length
 		int percent50 = Math.floorDiv(n_bitlen, 2); //50% of n length
 		
 		BigInteger q;

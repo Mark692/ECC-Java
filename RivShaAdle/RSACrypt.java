@@ -75,8 +75,12 @@ public class RSACrypt
 	}
 	
 	
-	public RSA get_rsa()
+	public void get_rsa()
 	{
-		return this.rsa;
+		System.out.println("p = " + this.rsa.get_p());
+		System.out.println("q = " + this.rsa.get_q());
+		System.out.println("n = " + this.rsa.get_n());
+		System.out.println("e = " + this.rsa.get_e());
+		System.out.println("d = " + this.rsa.get_d());
 	}
 }

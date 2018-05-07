@@ -18,7 +18,7 @@ public class bench_ECDH
 	public void test_me(Curve c, int totIter, int KeyGen)
 	{
 		System.out.println("Curva "+c.get_name()+", proprietario: "+c.get_author());
-		System.out.println("Rodaggio iniziale");
+		System.out.println("Rodaggio iniziale per avviare i meccanismi di Cache");
 		this.rodaggio(c, KeyGen);
 		System.out.println("Fine rodaggio. Inizio del vero test: ");
 		

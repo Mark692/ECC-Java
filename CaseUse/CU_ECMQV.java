@@ -30,10 +30,10 @@ public class CU_ECMQV
 		
 	
 		String crypt = e.encryptAugmented(Message, A_privs, A_publics, B_publics[0], MAClen, SharedData, SharedData2);
-		System.out.println("crypted bin (ori) = "+crypt);
+		System.out.println("Messaggio crittografato (hex) = "+crypt);
 
 		String ori = e.decryptAugmented(crypt, bob_privs, A_publics, MAClen, SharedData, SharedData2);
-		System.out.println("ori = "+ori);
+		System.out.println("Messaggio decifrato = "+ori);
 		
 	}
 	
@@ -53,10 +53,10 @@ public class CU_ECMQV
 		String SharedData = "Stringa casuale con un qualche testo ";
 		
 		String crypt = e.encrypt(Message, A_privs, A_publics, B_publics[0], SharedData);
-		System.out.println("crypted bin (ori) = "+crypt);
+		System.out.println("Messaggio crittografato (hex) = "+crypt);
 
 		String ori = e.decrypt(crypt, bob_privs, A_publics, SharedData);
-		System.out.println("ori = "+ori);
+		System.out.println("Messaggio decifrato = "+ori);
 		
 	}
 
