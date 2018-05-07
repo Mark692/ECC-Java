@@ -1,0 +1,439 @@
+package Curve;
+
+import java.math.BigInteger;
+import java.security.spec.*;
+import java.util.Map;
+import java.util.TreeMap;
+
+/**
+ * This class enables checks on many curves
+ */
+public final class Check
+{
+	/** Curve to check */
+	private Curve toCheck;
+	
+	
+	/**
+	 * Allows to check custom curves
+	 * 
+	 * @param curve A custom curve
+	 */
+	public Check(Custom curve)
+	{
+		set_toCheck(curve);
+	}
+
+	
+	/**
+	 * Allows to check known curves too
+	 * 
+	 * @param c A known curve to test
+	 */
+	public Check(Curve c)
+	{
+		set_toCheck(c);
+	}
+
+	
+	/**
+	 * Retrieves the chosen curve to check 
+	 * 
+	 * @return The curve to check
+	 */
+	public Curve get_toCheck()
+	{
+		return toCheck;
+	}
+
+	
+	/**
+	 * Sets the selected curve for being tested
+	 * 
+	 * @param toCheck The curve to check
+	 */
+	public void set_toCheck(Curve toCheck)
+	{
+		this.toCheck = toCheck;
+	}
+
+	
+	/**
+	 * Checks whether the curve is smooth
+	 * 
+	 * @return Whether the curve is smooth or not
+	 */
+	public boolean is_Smooth()
+	{
+		BigInteger a = get_toCheck().get_a();
+		BigInteger b = get_toCheck().get_b();
+		BigInteger p = get_toCheck().get_p();
+		
+		BigInteger a_clause = ((a.pow(3)).multiply(BigInteger.valueOf(4))).mod(p);
+		BigInteger b_clause = ((b.pow(2)).multiply(BigInteger.valueOf(27))).mod(p);
+
+		if(a_clause.compareTo(b_clause) != 0)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Checks whether the point generator G belongs to the curve
+	 * 
+	 * @return Whether the point G belongs to the curve
+	 */
+	public boolean G_isOnTheCurve()
+	{
+		BigInteger x = get_toCheck().get_G().getAffineX();
+		BigInteger y = get_toCheck().get_G().getAffineY();
+		BigInteger p = get_toCheck().get_p();
+		BigInteger a = get_toCheck().get_a();
+		BigInteger b = get_toCheck().get_b();
+		
+		y = (y.pow(2)).mod(p); // = y^2
+		x = (x.pow(3).add(a.multiply(x)).add(b)).mod(p); // = x^3 + ax + b
+		
+		if(y.compareTo(x) == 0)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Checks whether the order n is correct via n*G = Point at infinity
+	 * 
+	 * @return Whether n*G is the point at infinity or not
+	 */
+	public boolean n_isCorrect()
+	{
+		BigInteger n = toCheck.get_n();
+		if(toCheck.PointMultiplication(n).equals(ECPoint.POINT_INFINITY))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Checks whether the field cardinality p is enough for the security level L offered
+	 * 
+	 * @return Whether the field cardinality p is enough for the security level L offered or not
+	 */
+	public boolean secLevel_p()
+	{
+		int L = toCheck.get_L();
+		int binary_p = toCheck.get_p().bitLength();
+
+		boolean cond0 = L < 80 && binary_p == 2*L; //Certicom curves
+		boolean cond1 = L == 80 && binary_p == 192;
+		boolean cond2 = (L > 80 && L < 256) && binary_p == 2*L;
+		boolean cond3 = L == 256 && binary_p == 521;
+		
+		if(cond0 || cond1 || cond2 || cond3)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Checks whether the cofactor is small enough for the security level offered
+	 * 
+	 * @return Whether the cofactor is small enough for the security level offered or not
+	 */
+	public boolean secLevel_h()
+	{
+		int L = toCheck.get_L();
+		int h = toCheck.get_h();
+		int L_byte = (int) Math.ceil(L/8);
+		if(h <= Math.pow(2, L_byte))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Checks whether the curve has cardinality #E equal to field cardinality p. 
+	 * In this case the curve is said Anomalous and is not suitable for cryptographic purposes
+	 * 
+	 * @return Whether the curve has cardinality #E equal to field cardinality p or not
+	 */
+	public boolean isAnomalous()
+	{
+		BigInteger n = toCheck.get_n();
+		BigInteger h = BigInteger.valueOf(toCheck.get_h());
+		if((n.multiply(h)).compareTo(toCheck.get_p()) == 0)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Checks whether the order n satisfies the cardinality p in the range [1, 99] such as p^i != 1 mod(n)
+	 * 
+	 * @return Whether n is compatible with the cardinality p or not
+	 */
+	public boolean n_CompatibleWith_p()
+	{
+		BigInteger p = toCheck.get_p();
+		BigInteger n = toCheck.get_n();
+		
+		int i = 1;
+		boolean test = true;
+		BigInteger notONE;
+		while((i < 100) && test == true)
+		{
+			notONE = (p.pow(i)).mod(n);
+			if(notONE.compareTo(BigInteger.ONE) == 0)
+			{
+				test = false;
+			}
+			i++;
+		}
+		return test;
+	}
+	
+	
+	/**
+	 * Computes the curve order n and cofactor h
+	 * 
+	 * @return The curve cardinality and G's order. If p is not prime, {0, 0} is returned
+	 */
+	public BigInteger[] n_AND_h()
+	{
+		BigInteger[] interval = this.Hasse_Interval();
+		BigInteger x_G = toCheck.get_G().getAffineX();
+		BigInteger y_G = toCheck.get_G().getAffineY();
+		
+		
+		BigInteger iter = interval[0];
+		ECPoint Q;
+		BigInteger E_card = BigInteger.ZERO; //Curve's cardinality
+		
+		while(iter.compareTo(interval[1]) <= 0) //While inside the allowed values interval:
+		{
+			Q = toCheck.PointMultiplication(iter);
+
+			if(Q.equals(ECPoint.POINT_INFINITY))
+			{
+				E_card = iter;
+				break;
+			}
+			else if(Q.getAffineX().compareTo(x_G) == 0) //Same x coordinates
+				{
+					if(Q.getAffineY().compareTo(y_G) == 0)  //Same y coordinates: Q = G
+					{
+						E_card = iter.subtract(BigInteger.ONE); //Since G+O = G the order will be i-1
+						break;
+					}
+					else //Symmetric y coordinates: Q = -G
+					{
+						E_card = iter.add(BigInteger.ONE); //Since G+(-G) = O the order will be i+1
+						break;
+					}
+				}
+			else //Point not found, add 3 to the iter
+			{
+				iter = iter.add(BigInteger.valueOf(3));
+			}
+		}
+		
+		//Compute the curve's order n
+		BigInteger n = E_card;
+		loop:
+		for(Map.Entry<BigInteger, BigInteger> f : this.factor_it(n).entrySet()) //Finds sub-factors of E_Card which grant R = point at infinity
+		{
+			if(n.compareTo(f.getKey()) == 0) //If n is Prime
+			{
+				break loop;
+			}
+			
+			for(int counter = 0; f.getValue().compareTo(BigInteger.valueOf(counter)) > 0; counter++)
+			{
+				ECPoint R = toCheck.PointMultiplication(n.divide(f.getKey()));
+				if(R.equals(ECPoint.POINT_INFINITY)) //If R = point at infinity
+				{
+					n = n.divide(f.getKey());
+				}
+			}
+		}
+		BigInteger h = E_card.divide(n);
+		return new BigInteger[] {n, h};
+	}
+	
+	
+	/**
+	 * Checks whether the order n is prime
+	 * 
+	 * @return Whether n is prime or not
+	 */
+	public boolean isPrime()
+	{
+		BigInteger n = toCheck.get_n();
+		TreeMap<BigInteger, BigInteger> factors = this.factor_it(n);
+				
+		if((factors.lastKey()).compareTo(n) == 0) 
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Hasse's theorem says that the Elliptic Curve's order lies in a specific interval.
+	 * This function computes the interval's bounds and returns them in a BigInteger array
+	 * 
+	 * @param p The field's characteristic
+	 * @return An array with min and max bounds for EC's order
+	 */
+	private BigInteger[] Hasse_Interval()
+	{
+		BigInteger p = toCheck.get_p();
+		BigInteger two_squaroot = this.sqrt(p).multiply(BigInteger.valueOf(2)); // = 2*sqrt(p)
+		p = p.add(BigInteger.ONE); // = p+1
+		
+		BigInteger min = p.subtract(two_squaroot);
+		BigInteger max = p.add(two_squaroot);
+		
+		return new BigInteger[] {min, max};
+	}
+	
+	
+	/**
+	 * Computes the square root of a Big Integer. To be used in the Hasse's theorem.
+	 * THANKS: https://stackoverflow.com/questions/42204941/square-root-and-operators-for-biginteger-and-bigdecimal
+	 * CAVEAT: Changed the last instruction in order to give a less rounded result. 
+	 * 		   The Hasse algorithm would ignore some numbers otherwise
+	 * 
+	 * @param p The number to be square-rooted
+	 * @return The n's square root
+	 */
+	private BigInteger sqrt(BigInteger p)
+	{
+		if(p.compareTo(BigInteger.ONE) == 0)
+		{
+			return BigInteger.ONE;
+		}
+		BigInteger root = BigInteger.ONE; //BigInt constant value of 1
+		BigInteger b = p.shiftRight(5).add(BigInteger.valueOf(8));
+		while (b.compareTo(root) >= 0) 
+		{
+			BigInteger mid = root.add(b).shiftRight(1);
+			if (mid.multiply(mid).compareTo(p) > 0) 
+			{
+				b = mid.subtract(BigInteger.ONE);
+			} 
+			else 
+			{
+				root = mid.add(BigInteger.ONE);
+			}
+		}
+		return root;
+		//return a.subtract(BigInteger.ONE); //THIS GIVES A TOO MUCH ROUNDED RESULT.
+		//Hasse's theorem would be compromised by this last command
+	}
+	
+	
+	/**
+	 * This function enables to determine the factorization of a BigInteger "n".
+	 * I.E. 
+	 * n=2175030 = 2*3*3*5*11*13*13*13, the output shall be 
+	 * output=[2][1], [3][2], [5][1], [11][1], [13][3] as a TreeMap
+	 * 
+	 * @param n The number to factorise
+	 * @return A TreeMap with factors as keys and their powers as values 
+	 */
+	public TreeMap<BigInteger, BigInteger> factor_it(BigInteger n)
+	{
+		TreeMap<BigInteger, BigInteger> prods = new TreeMap<>();
+		
+		//Test 1 - Using Java a function
+		int probability = 128;
+		if(n.isProbablePrime(probability)) //% of correctness = 1 - (2^(-probability)). The higher the probability, the better
+		{
+			prods.put(n, BigInteger.ONE);
+			return prods;
+		}
+
+		//Test 2 - Version 2 as of http://www.javascripter.net/faq/numberisprime.htm last algorithm
+		BigInteger factor = BigInteger.valueOf(2); //Calculates the powers of 2
+		n = this.module_it(n, factor, prods);
+
+		factor = BigInteger.valueOf(3); //Calculates the powers of 3
+		n = this.module_it(n, factor, prods);
+
+		factor = BigInteger.valueOf(5); //Calculates the powers of 5
+		n = this.module_it(n, factor, prods);
+
+		factor = BigInteger.valueOf(7); //Enters the cycle
+		
+		while(n.compareTo(BigInteger.ONE) > 0)
+		{
+			n = this.module_it(n, factor, prods); //n % factor
+
+			factor = factor.add(BigInteger.valueOf(4)); //n % (factor + 4)
+			n = this.module_it(n, factor, prods);
+
+			factor = factor.add(BigInteger.valueOf(2)); //n % (factor + 6)
+			n = this.module_it(n, factor, prods);
+
+			factor = factor.add(BigInteger.valueOf(4)); //n % (factor + 10)
+			n = this.module_it(n, factor, prods);
+
+			factor = factor.add(BigInteger.valueOf(2)); //n % (factor + 12)
+			n = this.module_it(n, factor, prods);
+
+			factor = factor.add(BigInteger.valueOf(4)); //n % (factor + 16)
+			n = this.module_it(n, factor, prods);
+
+			factor = factor.add(BigInteger.valueOf(6)); //n % (factor + 22)
+			n = this.module_it(n, factor, prods);
+			
+			factor = factor.add(BigInteger.valueOf(2)); //n % (factor + 24)
+			n = this.module_it(n, factor, prods);
+
+			factor = factor.add(BigInteger.valueOf(6)); //factor + 30
+		}
+		
+		return prods;
+	}
+	
+	
+	/**
+	 * Enables to take note of each factor and their powers for the number n
+	 * 
+	 * @param n The number to factorise
+	 * @param modulo Determines the factorisation
+	 * @param myMap A map that will take note of n's factors (keys) and their powers (values)
+	 * @return The number n divided by the current factor^power
+	 */
+	private BigInteger module_it(BigInteger n, BigInteger modulo, TreeMap<BigInteger, BigInteger> myMap)
+	{
+		int check = (n.remainder(modulo)).compareTo(BigInteger.ZERO); //n % modulo == 0
+		if(check == 0) //remainder <-> mod. La funzione "mod" restituisce sempre un numero NON-Negativo
+		{
+			BigInteger exp = BigInteger.ZERO;
+
+			while(check == 0) //while n can be divided by the modulo
+			{
+				exp = exp.add(BigInteger.ONE); // = exp++;
+				n = n.divide(modulo);
+				check = (n.remainder(modulo)).compareTo(BigInteger.ZERO); //Changes at each iteration
+			}
+			myMap.put(modulo, exp);
+		}
+		return n;
+	}
+}

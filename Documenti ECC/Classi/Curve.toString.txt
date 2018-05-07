@@ -1,0 +1,185 @@
+package Curve;
+
+import java.math.BigInteger;
+import java.security.spec.ECPoint;
+
+/**
+ * This class compresses a point's coordinates. 
+ * Its effectiveness is highly doubtful when talking about output size.
+ * The log_2 notation is way longer than decimal's.
+ */
+public final class toString
+{
+	/**
+	 * Compresses a point's coordinates
+	 * 
+	 * @param P The point whose coordinates has to be compressed
+	 * @return The point's binary compressed representation
+	 */
+	public static String comprexBIN(ECPoint P)
+	{
+		if(P.equals(ECPoint.POINT_INFINITY))
+		{
+			return "00";
+		}
+		
+		BigInteger y = P.getAffineY();
+		if(y.mod(BigInteger.valueOf(2)).compareTo(BigInteger.ZERO) == 0) // if(y % 2 == 0)
+		{
+			return "02" + toString.log_2(P.getAffineX());
+		}
+		return "03" + toString.log_2(P.getAffineX());
+	}
+	
+	
+	/**
+	 * Converts a point into its binary notation with no coordinate compression
+	 * 
+	 * @param P The point to convert
+	 * @return The point's binary uncompressed representation
+	 */
+	public static String no_comprexBIN(ECPoint P)
+	{
+		if(P.equals(ECPoint.POINT_INFINITY))
+		{
+			return "00";
+		}
+		return "04" + toString.log_2(P.getAffineX()) + toString.log_2(P.getAffineY());
+	}
+	
+	
+	/**
+	 * Converts a BigInteger coordinate into its binary representation
+	 * 
+	 * @param c The coordinate to convert
+	 * @return Binary representation of the coordinate given
+	 */
+	private static String log_2(BigInteger c)
+	{
+		String c_com = "";
+		
+		while(c.compareTo(BigInteger.ONE) >= 0) // while(c >= 1)
+		{
+			c_com = c.mod(BigInteger.valueOf(2)) + c_com; 
+			if(c.mod(BigInteger.valueOf(2)).compareTo(BigInteger.ONE) == 0) // if(c%2 == 1) 
+			{
+				c = c.subtract(BigInteger.ONE);
+			}
+			c = c.divide(BigInteger.valueOf(2));
+		}
+		
+		return c_com;
+	}
+	
+
+	/**
+	 * Converts a point into its hexadecimal notation with coordinate compression
+	 * 
+	 * @param P The point whose coordinates has to be compressed
+	 * @return The point's hexadecimal compressed representation
+	 */
+	public static String comprHEX(ECPoint P)
+	{
+		if(P.equals(ECPoint.POINT_INFINITY))
+		{
+			return "00";
+		}
+		
+		BigInteger y = P.getAffineY();
+		if(y.mod(BigInteger.valueOf(2)).compareTo(BigInteger.ZERO) == 0) // if(y % 2 == 0)
+		{
+			return "02" + toString.log_16(P.getAffineX());
+		}
+		return "03" + toString.log_16(P.getAffineX());
+	}
+	
+	
+	/**
+	 * Converts a point into its hexadecimal notation with no coordinate compression
+	 * 
+	 * @param P The point to convert
+	 * @return The point's hexadecimal uncompressed representation
+	 */
+	public static String no_comprHEX(ECPoint P)
+	{
+		if(P.equals(ECPoint.POINT_INFINITY))
+		{
+			return "00";
+		}
+		return "04" + toString.log_16(P.getAffineX()) + toString.log_16(P.getAffineY());
+	}
+	
+	
+	/**
+	 * Converts a BigInteger coordinate into its hexadecimal representation
+	 * 
+	 * @param c The coordinate to convert
+	 * @return Hexadecimal representation of the coordinate given
+	 */
+	private static String log_16(BigInteger c)
+	{
+		String c_com = "";
+		BigInteger sub;
+		
+		while(c.compareTo(BigInteger.ONE) >= 0) // while(c >= 1)
+		{
+			sub = c.mod(BigInteger.valueOf(16));
+			c_com = toString.hex_val(sub) + c_com; 
+			
+			if(sub.compareTo(BigInteger.ZERO) == 0) // if(c%16 != 0) 
+			{
+				c = c.subtract(sub);
+			}
+			c = c.divide(BigInteger.valueOf(16));
+		}
+		
+		return c_com;
+	}
+	
+	
+	/**
+	 * Switches the parameter to its hexadecimal value
+	 * 
+	 * @param c The decimal value to convert
+	 * @return The hexadecimal notation of the parameter given
+	 */
+	private static String hex_val(BigInteger c)
+	{
+		if(c.compareTo(BigInteger.TEN) < 0)
+		{
+			return c.toString();
+		}
+		
+		if(c.compareTo(BigInteger.valueOf(10)) == 0)
+		{
+			return "A";
+		}
+		
+		if(c.compareTo(BigInteger.valueOf(11)) == 0)
+		{
+			return "B";
+		}
+		
+		if(c.compareTo(BigInteger.valueOf(12)) == 0)
+		{
+			return "C";
+		}
+		
+		if(c.compareTo(BigInteger.valueOf(13)) == 0)
+		{
+			return "D";
+		}
+		
+		if(c.compareTo(BigInteger.valueOf(14)) == 0)
+		{
+			return "E";
+		}
+		
+		if(c.compareTo(BigInteger.valueOf(15)) == 0)
+		{
+			return "F";
+		}
+		
+		return "X";
+	}
+}

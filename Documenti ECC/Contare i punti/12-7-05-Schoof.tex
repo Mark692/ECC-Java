@@ -1,0 +1,711 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\newtheorem{Thm}{Theorem}
+\newtheorem{Conj}{Conjecture}
+\newtheorem{Cor}{Corollary}
+\newtheorem{Lem}{Lemma}
+\newtheorem{Prop}{Proposition}
+\newtheorem{Ques}{Question}
+\newtheorem{Goal}{Goal}
+\newtheorem{Claim}{Claim}
+\newtheorem{Def}{Definition}
+\newtheorem{Rem}{Remark}
+\newtheorem{Exa}{Example}
+\newcommand{\A}{\mathbb{A}}
+\newcommand{\If}{\mbox{if}}
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\q}{\mathbb{Q}}
+\newcommand{\qss}{\ensuremath{{\bf QI}_m}}
+\newcommand{\QI}{\ensuremath{ Q_T^{~k,m}}}
+\newcommand{\Qdown}{\ensuremath{ Q_T^{~n-i+k,m-1}}}
+\newcommand{\tn}{\mathbb{T}_n}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\g}{\mathfrak{g}}
+\newcommand{\PP}{\mathfrak{p}}
+\newcommand{\etal}{{\it et~al.\ }}
+\newcommand{\ie} {{\it i.e.,\ }}
+\newcommand{\eg} {{\it e.g.,\ }}
+\newcommand{\cf}{{\it cf.,\ }}
+\newcommand{\eqdef}{\mathbin{\stackrel{\rm def}{=}}}
+\newcommand{\p}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\n}{\mathbb{N}}
+\newcommand{\z}{\mathbb{Z}}
+\newcommand{\f}{\mathbb{F}}
+\newcommand{\sgn}{\rm{sgn}}
+\newcommand{\hC}{\widehat{C}}
+\newcommand{\hR}{\widehat{R}}
+\newcommand{\al}{\alpha_{i,j_a}}
+
+\begin{document}
+\title{Schoof's Algorithm for Counting Points on $E(\f_q)$}
+\author{Gregg Musiker}
+\date{December 7, 2005} \maketitle
+
+
+\section{Introduction}
+
+In this write-up we discuss the problem of counting points on an elliptic curve over a finite
+field.  Here, an elliptic curve $E$ is the zero locus of an algebraic equation of a special form.
+Over a field of characteristic $\not = 2, 3$, this equation can be written as \begin{eqnarray}
+\label{WeEq} y^2 = x^3 + Ax+B.\end{eqnarray} This is commonly known as {\bf Weierstra\ss ~form}. To
+be rigorous, we would have to introduce projective coordinates to define the entire zero locus.
+However, in the case of an elliptic curve, the zero locus includes all the points $(x,y)$
+satisfying equation (\ref{WeEq}), these are known as affine points, plus \emph{exactly one} additional
+point $P_\infty$ ``at infinity".  While there is also an extensive theory of elliptic curves over
+$\q$ and $\C$, in this presentation, we will focus on elliptic curves $E(\f_q)$ over a finite field
+$\f_q$, where $q=p^k$ and $p$ is a prime greater than $3$.
+
+One of the important properties of elliptic curves is the existence
+of a group law $$\oplus : E \times E \rightarrow E.$$ Given $E$ as
+above, the addition on the curve is given as follows: For $P_1 =
+(x_1,y_1)$ and  $P_2 = (x_2,y_2)$, $P_1 \oplus P_2 = P_3 =
+(x_3,y_3)$ where
+
+1) If $x_1 \not = x_2$ then $$x_3 = m^2 - x_1 - x_2 \mathrm{~~and~~}
+y_3 = m(x_1-x_3)-y_1 \mathrm{~~with~~} m= {y_2-y_1 \over x_2-x_1}.$$
+
+2) If $x_1 = x_2$ but ($y_1\not = y_2$, or $y_1=0=y_2$)  then $P_3 = P_\infty$. \\
+
+3) If $P_1 = P_2$ and $y_1 \not = 0$, then
+$$x_3 = m^2 - 2x_1 \mathrm{~~and~~} y_3 = m(x_1-x_3)-y_1 \mathrm{~~with~~} m= {3x_1^2+A \over 2y_1}.$$
+
+4) $P_\infty$ acts as the identity element in this addition.
+
+\noindent Among other things, this allows elliptic curves to be used
+in cryptography, usually taking advantage of the difficulty of the
+discrete logarithm problem for group $E(\f_q)$. Because of this
+application, an important computation for cryptographic purposes is
+the cardinality of $E(\f_q)$, which also happens to be the order of
+the group used for encryption.  If the order of the group has small
+primes dividing it, then it leads to a weaker encryption scheme.
+Thus, if one is going to use elliptic curves for cryptography, it is
+important to have an efficient method to test the strength of the encryption scheme for a
+given curve $E$ over $\f_q$.
+
+While a few methods exist for computing the size of $|E(\f_q)|$ (as
+described in \cite{Harris}), e.g. directly counting after running
+through possible values of $x$ and $y$ in $\f_q$, applying the
+formula $$|E(\f_q)| = q + 1 + \sum_{\alpha \in \f_q} \bigg({x^3+Ax+B
+\over q}\bigg), $$ Shank's Baby Step-Giant Step
+Method; the fastest one for extremely large primes is
+a variant of Schoof's algorithm.
+
+Here I will first describe Schoof's original algorithm, as presented
+in \cite{Schoof1} and summarized in \cite{Wash}.  After this
+warm-up, we will describe an improvement of Elkies which leads to a
+more efficient algorithm.  There is in fact an additional
+improvement from Atkin to make Schoof-Elkies-Atkin (SEA) one of the
+fastest algorithm for counting the number of points on $E$ over a
+large prime field, but its description will be outside the scope of
+this paper.  (This full algorithm has been implemented in the
+computer algebra systems Magma, PARI, and SAGE.  Please see
+\cite{PariImp} for details on the PARI implementation.  In SAGE, you
+can use the command $E.sea(p)$.)
+
+To begin, we note that the size of $E(\f_q)$ is very close to $q+1$.  This is not completely surprising
+since half of the elements of $\f_q^\times$ are squares, and the equation $y^2 = \alpha$ has two solutions
+if $\alpha$ is a square, one solution if $\alpha=0$, and zero solutions if $\alpha$ is not a square
+in $\f_q^\times$.  Thus $y^2 = x$ would have exactly $q$ solutions of form $(x_0,y_0)$ plus the point at
+infinity. Unfortunately, it is not always true that quantity $x^3+Ax+B$, $x \in \f_q$, is a square half
+the time, but we at least expect it to be a square \emph{close} to half the time.  By analogous
+reasoning, we get that $y^2 = x^3+Ax+B$ will have approximately $q+1$ solutions, including
+$P_\infty$.  
+
+We now proceed to make this statement more precise.
+\begin{Thm} [Hasse 1934] \label{HasseWeil}
+Letting $N_1$ denote $|E(\f_q)|$, we obtain that $$|N_1 - q -1| \leq 2\sqrt{q}.$$
+\end{Thm}
+\noindent This is a deep theorem, and can actually be shown to be equivalent to the Riemann Hypothesis for
+genus one function fields.  We will give a partial proof of this theorem in Section \ref{FrobChar}.  More details are in \cite{Wash}.
+ We have now simplified our problem by narrowing down $|E(\f_q)|$ to a finite (albeit large) set of
+possibilities.
+
+Rene Schoof's insight was exploiting the fact we know that there is a finite range of
+possible values for the cardinality of $E(\f_q)$.  Hence, if we had some way of computing
+the size of $E(\f_q)$ modulo $N$ where $N > 4\sqrt{q}$, that would be sufficient for determining $|E(\f_q)|$.  There is not an efficient way to compute
+$|E(\f_q)|$ mod $N$ directly for general $N$, however there is an efficient way to compute $|E(\f_q)|$ mod $l$ for $l$ prime.
+
+Hence, we will compute $|E(\f_q)|$ mod $l$ for $l$ in a set $S$ of primes such that $\prod_{l \in S} l = N > 4\sqrt{q}$.  The Chinese Remainder Theorem, 
+found described in numerous sources including 
+\cite{CRT}, allows us to compute $|E(\f_q)|$ mod $N$ given $|E(\f_q)|$ mod $l$ for all $l \in S$.
+
+We now proceed to describe how to efficiently compute $|E(\f_q)|$ mod $l$ for a prime $l \not = $p.  Note that requiring $p \not\in S$ is no loss since
+we can pick a bigger prime to take its place to ensure the product is big enough.
+
+To efficiently compute $|E(\f_q)|$ mod $l$, we will acutally find it easier to compute the values
+$$t_l \equiv q + 1 -|E(\f_q)|~(\mathrm{mod~} l).$$
+This computation will require a digression into the theory of the Frobenius map and Division
+Polynomials so we provide those now.
+
+\section{The Characteristic Equation for the Frobenius Endomorphism} \label{FrobChar}
+
+Given an elliptic curve $E(\f_q)$ we consider $\overline{E}$ to be the curve with same defining equation as $E$, but now allowing points with coordinates
+in $\overline{\f_q}$, the algebraic closure of $\f_q$.  Given curve $\overline{E}$, there exists a map, in fact its an endomorphism back onto
+$\overline{E}$, defined as
+$$\pi : (x,y) \mapsto (x^q,y^q).$$
+This map has several useful properties:
+
+$\bullet$ For $P \in \overline{E}$, $\pi(P) \in \overline{E}$, thus it is in fact an endomorphism of $\overline{E}$ as claimed.
+
+$\bullet$ For $P \in \overline{E}$, $\pi(P) = P$ if and only if $P \in E(\f_q)$.  In particular $\pi(P_\infty) = P_\infty$.
+
+$\bullet$ For $P,Q \in \overline{E}$, $\pi(P\oplus Q) = \pi(P) \oplus \pi(Q)$, thus $\pi$ is compatible with the addition on the curve and in fact
+we can think of acting by $\pi$ as multiplication in our endomorphism ring since the distributive law holds.
+
+On $E(\f_q)$, the Frobenius map satisfies the characteristic equation $\pi - 1 = 0$.  This begs the question of what kind of characteristic equation
+$\pi$ satisfies on all of $\overline{E}$.  In fact in satisfies a quadratic equation.
+
+\begin{Thm} \label{chareqn}
+Frobenius map $\pi$ satisfies the characteristic equation \begin{eqnarray} \label{eqnchar} \pi^2 - t\pi + q = 0\end{eqnarray} where $t = q + 1
+- |E(\f_q)|$.
+\end{Thm}
+
+\noindent The proof of Theorem \ref{chareqn} is outside the scope of this presentation, although please
+see \cite{Wash} for details.  Nonetheless, we can use Theorem \ref{chareqn} to give a sketch of
+the proof of Theorem \ref{HasseWeil}.
+
+\begin{proof} (Sketch) It can be shown that not only is $x^2-tx+q$ the characteristic equation for
+the Frobenius map $\pi$, but furthermore, for all rational numbers $r/s \in \q$,
+\begin{eqnarray} \label{rateqn} (r/s)^2-t(r/s) + q \geq 0.\end{eqnarray}  This of course implies that $x^2 - tx + q \geq 0$ for all real
+numbers $x \in \R$. One way to show inequality (\ref{rateqn}) is by using $\pi$'s characteristic
+equation to prove that for all $r,s\in \z$, the quantity $r^2 - trs + qs^2$ equals deg $(r-s\pi)$,
+which is in $\z_{\geq 0}$ by definition of degree. Once we have $x^2 - tx + q \geq 0$ for all real
+numbers $x \in \R$, Theorem \ref{HasseWeil} quickly follows by noting that the discriminant cannot
+be positive, hence
+$$t^2 - 4q \leq 0 \Rightarrow |t| \leq 2\sqrt{q}.$$
+\end{proof}
+
+Theorem \ref{chareqn} also immediately implies the following identity on the curve $\overline{E}$:
+$$\mathrm{For~all~}P=(x,y) \in \overline{E},~~~~(x^{q^2},y^{q^2}) \oplus q(x,y) = t(x^q,y^q)$$ where scalar multiplication by $t$ (or $q$)
+signifies adding a point to itself $t$ (or $q$) times.  We now spend the rest of this section, as
+well as the next two, on the problem of determining $t_l$, defined as $t$ mod $l$, for a given
+prime $l \not = 2, ~p$. We therefore, refer to $l$ as if it's been fixed, unless otherwise
+specified.
+
+If point $(x,y)$ is in the torsion subgroup $\overline{E}[l]$, meaning that $l(x,y) = P_\infty$,
+then the point $qP = \overline{q}P$ where $\overline{q}$ signifies $q$ mod $l$, choosing
+$\overline{q}$ so that $|\overline{q}| < l/2$. Since $\pi(P_\infty) = P_\infty$, and $r \in \z$
+implies $r \cdot\pi(P) = \pi(rP)$ by repeated use of the distributive law, $\pi(P)$ will have the
+same order as $P$.  Thus for $(x,y) \in \overline{E}[l]$, we also have $ t(x^q,y^q) =
+\overline{t}(x^q,y^q)$ where $\overline{t}$ is $t$ mod $l$. Hence we have reduced our problem to
+solving the equation
+\begin{eqnarray} \label{Ttosol} (x^{q^2},y^{q^2}) \oplus \overline{q}(x,y) \equiv
+\overline{t}(x^q,y^q) \mathrm{~(mod~}l)\end{eqnarray} for $\overline{t}$ (mod $l$).
+
+The idea now is to explicitly compute $(x^{q^2},y^{q^2}) \oplus \overline{q}(x,y)$ as a pair of
+rational functions $(x^\prime,y^\prime)$ in terms of $x$ and $y$.  One method for finding $t_l$
+would involve plugging in $\overline{t} = 0, 1, 2, \dots, l-1$ and find $\overline{t}$ such that
+the pair of rational functions given by $\overline{t}(x^q,y^q)$ are the same as the pair of
+rational functions on the left-hand-side, thus determining $t_l$.  However, to do this more
+efficiently, we use division polynomials to allow us to compute multiples of a point $P$, and work
+with polynomials with bounded degrees instead of rational functions.
+
+\section{Division Polynomials} \label{DivPol}
+
+We define a sequence of polynomials in $\z[x,y,A,B]$ via the following initial conditions and recurrence equations:
+\begin{eqnarray*}
+\psi_0 &=& 0 \\
+\psi_1 &=& 1 \\
+\psi_2 &=& 2y \\
+\psi_3 &=& 3x^4 + 6Ax^2 + 12Bx-A^2 \\
+\psi_4 &=& 4y(x^6 + 5Ax^4 + 20Bx^3 - 5A^2x^2 - 4ABx - 8B^2 - A^3) \\
+&\cdots& \\
+\psi_{2m+1} &=& \psi_{m+2}\psi_m^3 - \psi_{m-1}\psi_{m+1}^3 \mathrm{~for~ }m \geq 2 \\
+\psi_{2m} &=& ({\psi_m \over 2y})\cdot (\psi_{m+2}\psi_{m-1}^2 - \psi_{m-2}\psi_{m+1}^2)  \mathrm{~for~ }m \geq 2
+\end{eqnarray*}
+The polynomial $\psi_n$ is known as the $n$th Division Polynomial \cite{Lang,Wash}.  These
+polynomials turn out to have the remarkable property that all of the finite $n$-torsion points
+$(x_0,y_0)$, i.e. elements of $\overline{E}[n] \setminus \{P_\infty\}$, satisfy $\psi_n^2(x_0,y_0)
+= 0$.  (Note that it can be shown using a variant of the characteristic equation (\ref{eqnchar}) that the number of finite torsion 
+points is exactly $n^2-1$.)
+
+Additionally, we can define the multiple of a point, $r\cdot(x,y)$, as a pair of rational functions
+in terms of $x$ and $y$ using the $\psi_n$'s. In particular, we have the following:
+
+\begin{Prop} \label{elladd}
+Let $P= (x,y)$ be a point on the elliptic curve $y^2=x^3+Ax+B$ over some field of characteristic $\not = 2$.  Then for any positive integer
+$n$, $nP = P \oplus P \oplus P \oplus \dots \oplus P$ is given by
+
+$$nP = \bigg({ \phi_n(x)\over \psi_n^2(x)} , ~{\omega_n(x,y) \over \psi_n^3(x,y)}\bigg) =\bigg(x-{\psi_{n-1}\psi_{n+1}\over \psi_n^2(x)} ,
+~{\psi_{2n}(x,y) \over 2\psi_n^4(x)}\bigg).$$
+
+$$-nP = \bigg({\phi_n(x)\over \psi_n^2(x)} , ~-{\omega_n(x,y) \over \psi_n^3(x,y)}\bigg) = \bigg(x-{\psi_{n-1}\psi_{n+1}\over \psi_n^2(x)} ,
+~-{\psi_{2n}(x,y) \over 2\psi_n^4(x)}\bigg)$$
+where the polynomials $\phi_n$ and $\omega_n$ are defined as
+\begin{eqnarray*}
+\phi_m &=& x\psi_m^2 - \psi_{m+1}\psi_{m-1} \\
+\omega_m &=& {\psi_{m+2}\psi_{m-1}^2 - \psi_{m-2}\psi_{m+1}^2 \over 4y}.
+\end{eqnarray*}
+
+\end{Prop}
+Note that using the equivalence relation $y^2 \equiv x^3 + Ax+B$ and
+the recurrence relations for $\psi_{2m}$ and $\psi_{2m+1}$, we can
+inductively prove that $$\psi_n^2, ~{\psi_{2n} \over y},
+~\psi_{2n+1},~\mathrm{and~}\phi_n
+\mathrm{~are~all~functions~in~terms~of~}x.$$ As a corollary, the
+$x$-coordinate of $nP$ is a rational function strictly in terms of
+$x$, and the $y$-coordinate has the form $y\cdot\Theta(x)$.
+Proposition \ref{elladd} is commonly proved using the theory of the
+Weirestra\ss~$\mathfrak{P}$-function, as given in \cite{Lang} and
+\cite[Chapter 9]{Wash}.
+
+
+We can summarize these results as follows: $\psi^2$ is a function in
+$x$ alone and has degree $n^2-1$, which equals the number of finite
+$n$-torsion points.  The degree of $\psi^2$ is easily verified via
+the above recurrence relations.  Furthermore, if $n$ is odd and
+$(x_0,y_0) \in \overline{E} \setminus \{P_\infty\}$, then
+\begin{eqnarray} \label{oddpsi} \psi_n(x_0) = 0
+\mathrm{~if~and~only~if~}(x_0,y_0) \in
+\overline{E}[n].\end{eqnarray}
+
+If $n$ is even, $E$ defined by equation $y^2 = (x-\alpha_1)(x-\alpha_2)(x-\alpha_3)$ over
+$\overline{\f_q}$, and $(x_0,y_0) \in \overline{E} \setminus \{P_\infty,
+~(\alpha_1,0),~(\alpha_2,0),~(\alpha_3,0)\}$, then
+
+\begin{eqnarray} {\psi_n \over y}(x_0) = 0 \mathrm{~if~and~only~if~}(x_0,y_0) \in
+\overline{E}[n].\end{eqnarray}
+
+%\begin{Ques}
+%Given a curve over a finite field, is a simpler proof known for proving these properties that does
+%not require the theory of elliptic curves over $\C$ and the notion that identities over
+%characteristic $0$ imply identities over characteristic $p$?  After all, it seems strange that a
+%direct proof which only requires the theory of elliptic curves over finite fields does not exist.
+%Closest I have found is \cite{Enge}.  This is an unenlightening technical proof however. [FOR DRAFT
+% AND OH ONLY UNLESS A REASONABLE QUESTION]
+%\end{Ques}
+
+%\begin{Lem}\cite[pg. 78]{Wash}
+
+%\begin{eqnarray*}
+%\phi_n(x) &=& x^{n^2} + \mathrm{~lower~degree~terms}\\
+%\psi_n^2(x) &=& n^2x^{n^2-1} + \mathrm{~lower~degree~terms}\\
+%\mathrm{in ~fact} \\
+%\psi_{2n} &=& y(2n x^{2n^2-2} + \mathrm{~lower~degree~terms}\\
+%\psi_{2n+1} &=& (2n+1)x^{2n^2+2n} + \mathrm{~lower~degree~terms}
+%\end{eqnarray*}
+%\end{Lem}
+
+
+%\begin{Cor}
+%The degree of the endomorphism/isogeny of multiplication by $n$ has degree $n^2$.
+%\end{Cor}
+
+%This is simply because the maximum of the degrees of $\phi_n(x)$ and $\phi_n^2(x)$, which in fact only depend on $x$, is $n^2$.
+
+%Possibly more clearly,
+%the degree of the denominator is $n^2-1$ and this morphism/isogeny is separable, which means it has no multiple roots, and thus we have $n^2-1$ values
+%of $\alpha \in \overline{\f_p}$ we can plug in to obtain a zero denominator, i.e. an $x$-coordinate of $\infty$.
+
+%Hence, if we let $P = P_\infty$ or $(\alpha, \beta)$ where $\alpha$ a zero of $\phi_n^2(x)$, we obtain $nP = P_\infty$.  $n^2$ possibilities, thus
+%$n^2$ elements in the kernel of this seperable morphism, hence degree $n^2$.
+
+%Note in the case $gcd(n,p) > 1$ the multiplication map is not separable.  The degree is still $n^2$, but the size of the kernel is smaller since
+%multiple roots.
+
+\section{The Remainder of the Original Algorithm}
+
+With preliminaries out of the way, we proceed to present Schoof's algorithm for computing $t_l$,
+which is defined as $q + 1 - |E(\f_q)|$ (mod $l$), for $l \not = 2,~p$.  We recall our definition
+of $\overline{q}$ as a specific integer satisfying $\overline{q} \equiv q$ (mod $l$) and
+$|\overline{q}| < l/2$.  First we use division polynomials to rewrite $\overline{q}(x,y)$ as a pair
+of rational functions in $x$ and $y$:
+
+$$(x_{\overline{q}}, y_{\overline{q}}) = \overline{q}(x,y) = \bigg(x-{\psi_{\overline{q}-1}\psi_{\overline{q}+1}\over \psi_{\overline{q}}^2(x)} ,
+~{\psi_{2\overline{q}}(x,y) \over \psi_{\overline{q}}^4(x)}\bigg).$$
+
+We then encounter an obstacle because the formula for computing
+$$(x^{q^2},y^{q^2}) \oplus \overline{q}(x,y),$$ given rational
+function representations of each of $(x^{q^2},y^{q^2})$ and
+$(x_{\overline{q}},y_{\overline{q}}) = \overline{q}(x,y)$, will
+depend on which of three cases, (e.g. are the points distinct, do
+they share the same $x$-coordinate), we are in.  There is not an efficient enough way to determine which case we are to justify taking the time to check 
+whether or not we happen to fall into the two uncommon special cases.  Thus we might as well assume we happen to be in the case 
+$(x^{q^2},y^{q^2}) \not = \pm \overline{q}(x,y)$.  If our guess is correct, 
+which it will be most of the time, the proceeding algorithm will find $t_l$ for us.  If our guess is incorrect, our algorithm 
+will find that no such $\overline{t}$ that will satisfy (\ref{Ttosol}), hence alerting us that we are in the case
+$(x^{q^2},y^{q^2}) = \overline{q}(x,y)$ or  $(x^{q^2},y^{q^2}) = - \overline{q}(x,y)$.  We will prove the above assertions, and give the algorithm for 
+these two cases in Section \ref{DecCases}.
+
+Thus, as prescribed, we now assume that
+$(x^{q^2},y^{q^2}) \not = \pm \overline{q}(x,y)$ for some $(x,y) \in
+\overline{E}[l]\setminus\{P_\infty\}$.  Hence, if we wish to compute
+$$(x^\prime, y^\prime) = (x^{q^2},y^{q^2}) \oplus \overline{q}(x,y),$$ we can use the usual addition formula and obtain
+$$x^\prime = \bigg({y^{q^2}-y_{\overline{q}} \over x^{q^2}-x_{\overline{q}}}\bigg)^2 - x^{q^2}- x_{\overline{q}}.$$
+We get an analogous formula for $y^\prime$, but it is more
+computationally efficient to first use the $x$-coordinate to narrow
+down the choice of $\overline{t}$ to two possibilities. We must then
+determine which square-root of
+$$\pm \sqrt{{x^\prime}^3 + Ax^\prime + B}$$ to use.
+
+We recall from Section \ref{DivPol} that the $y$-coordinate of
+$\overline{q}(x,y)$, which we denote as $y_{\overline{q}}$, equals
+$y\Theta(x)$ and factor
+$$(y^{q^2}-y\Theta(x))^2 = y^2(y^{q^2-1}-\Theta(x))^2 =
+(x^3+Ax+B)\bigg((x^3+Ax+B)^{q^2-1 \over 2}-\Theta(x)\bigg)^2$$ to
+discover that $x^\prime$ is a rational function in variable $x$
+alone.
+
+We will soon use the following fact: If $x^\prime = x_{\overline{t}}^q$ for one point $P$ in
+$\overline{E}[l]\setminus \{P_\infty\}$, then $\overline{t}$
+satisfies
+$$\pi^2(P) \ominus \overline{t}\pi(P) \oplus qP = P_\infty.$$ But
+since $\overline{t}$ in the characteristic equation is fixed, we
+obtain that this choice of $\overline{t}$ must indeed be $t_l$ and
+we have proven $x^\prime = x_{\overline{t}}^q$ for all points $P$ in
+$\overline{E}[l]\setminus \{P_\infty\}$.
+
+We recall that our goal is to solve (\ref{Ttosol}) for
+$\overline{t}$.  Taking $x$-coordinates of both sides, we obtain
+that the left-hand-side of (\ref{Ttosol}) is $x^\prime$ and the
+right-hand-side is $x_{\overline{t}}^q$.  We use our fact that for
+odd prime $l$, point $(x_0,y_0) \in \overline{E}[l]\setminus
+\{P_\infty\}$ if and only if $\psi_l(x_0)=0$.  Furthermore, the
+roots of $\psi_l$ are simple by an easy counting argument.  In
+particular, the degree of $\psi_l^2$ is exactly the number of finite
+$l$-torsion points.  
+
+Thus the equality $x_0^\prime =
+x_{0_{\overline{t}}}^q$ at all points $(x_0,y_0) \in
+\overline{E}[l]\setminus \{P_\infty\}$ is equivalent to the
+statement $$\psi_l(x) \bigg | (x^\prime - x_{\overline{t}}^q)$$ as a 
+polynomial in $x$, modulo $l$.  In conclusion, to solve (\ref{Ttosol}) for $\overline{t}$, we need only solve
+\begin{eqnarray} \label{Eqtosol} x^\prime - x^q_{\overline{t}} \equiv 0 ~(\mathrm{mod~}\psi_l)\end{eqnarray} for
+$\overline{t}$.
+
+This computation can be done efficiently for given $\overline{t} \in
+\{1,2,\dots,{l-1\over 2}\}$ by computing the power $x_{\overline{t}}^q$ by
+{\bf successive squaring}.  (Note that we can stop checking $\overline{t}$ at ${l-1 \over 2}$ since we are only currently determining $t_l$ up 
+to additive inverse modulo $l$.)  We create a table of
+$$x_{\overline{t}}^{2^i} \mathrm{~(mod}~\psi_l) \mathrm{~~~~for~}i=0,1,2,\dots, \log_2 q,$$ each of
+which will be a polynomial of degree less than ${l^2-1\over 2} = $ deg $~\psi_l$.  We then can
+compute $x_{\overline{t}}^{q} \equiv x_{\overline{t}}^{2^{i_1}}\cdots x_{\overline{t}}^{2^{i_k}}$
+(mod~$\psi_l$) where $q=2^{i_1}+\dots+2^{i_k}$ is the binary expansion of $q$.
+
+Once we find $\overline{t}$ such that (\ref{Eqtosol}) is satisfied, we have found $\overline{t}$ such that
+$$(x^{q^2},y^{q^2}) \oplus \overline{q}(x,y) = \pm \overline{t}(x^q,y^q) \mathrm{~(mod~}l).$$
+In particular $-(x^q,y^q) = (x^q,-y^q)$ thus the $x$-coordinate can
+only narrow down the possibilities of $t_l$ to two.
+
+To find whether $t_l$ is $+\overline{t}$ or $-\overline{t}$ we check
+whether or not
+\begin{eqnarray} (y^\prime - y^q_{\overline{t}})/y \equiv 0 ~(\mathrm{mod~}\psi_l).\end{eqnarray}
+If so, then we choose $+\overline{t}$, otherwise $t_l =
+-\overline{t}$. This is sufficient for exactly the same reason as
+the sufficiency of (\ref{Eqtosol}).
+
+\subsection{The Cases  $(x^{q^2},y^{q^2})  = \pm\overline{q}(x,y)$}
+\label{DecCases}
+
+Our first important assertion is that if we falsely assumed points $(x^{q^2},y^{q^2})$ and 
+$\overline{q}(x,y) = (x_{\overline{q}},y_{\overline{q}})$ had different 
+$x$-coordinates, then the above procedure would not have found $\overline{t}$ such that (\ref{Ttosol}) was satisfied.  
+
+Suppose on the contrary, that $\overline{t} \in \{1,2,\dots, {l-1\over 2}\}$ has satisfied (\ref{Eqtosol}) but that we have 
+$(x^{q^2},y^{q^2})  = \pm\overline{q}(x,y)$.  Then 
+$$\overline{t}(x^q,y^q)\ominus (x^{q^2},y^{q^2})$$ would be the same point as $\overline{q}(x,y) = \pm (x^{q^2},y^{q^2})$, modulo $l$.  But, this will 
+lead to an immediate contradiction in the addition law.
+
+So once we have failed to find a $\overline{t}$ we know that we have  $(x^{q^2},y^{q^2})  = \overline{q}(x,y)$ or 
+$(x^{q^2},y^{q^2})  = -\overline{q}(x,y)$.  So now assume we are in this case.
+Let us assume further that we have \begin{eqnarray} \label{secassump} (x^{q^2},y^{q^2})  = +\overline{q}(x,y).\end{eqnarray}  
+Like before, our guess might be incorrect, but we will soon find out so.  
+For $P = (x,y) \in \overline{E}[l]\setminus\{P_\infty\}$ satisfying (\ref{secassump}), 
+we obtain via the characteristic equation (\ref{eqnchar}) modulo $l$ that 
+$$\overline{t}\pi(P) = 2\overline{q}P.$$ By (\ref{secassump}), we also have $$\overline{t^2}\overline{q}P=\overline{t^2}\pi^2(P) = 
+\overline{t}\pi(\overline{t}\pi(P))$$ which equals 
+$(2\overline{q})^2P$.  Consequently, $$\overline{t}^2\overline{q}P \equiv (2q)^2P ~(\mathrm{mod~}l)$$ and thus $\overline{q}$ is a square modulo $l$ 
+unless $\overline{t} \equiv 0 $ (mod $l$).  However, that would imply $2\overline{q}P = P_\infty$, which is a contridiction since $P \in \overline{E}[l]$ 
+and gcd$(q,l)$ assumed to be $1$.
+
+Once we know $q$ is a square, the rest follows easily.  We find $q$'s square-roots over $\f_l$ efficiently by using gcd$(x^2-q,x^l-x)$ or otherwise.
+If $q \equiv w^2$ (mod $l$), we find $t_l$
+will be $\pm 2w$ mod $l$ depending on the $y$-coordinate, i.e. the
+rational function $y_w$.  \begin{eqnarray} \label{factchar} (X\pm w)(X\pm w) = X^2 \pm 2wX + q.\end{eqnarray} If $y_w$ matches $y^q$, then $t_l = 2w$,
+otherwise $t_l = -2w$.  
+
+If $q$ happened not to be a square, then our second assumption was also false, meaning we were in the third case 
+$$(x^{q^2},y^{q^2})  = -\overline{q}(x,y).$$  Once we know we are in this csae, it is also easy since we immediately find 
+$$(x^{q^2},y^{q^2})  \oplus \overline{q}(x,y) = P_\infty$$ since they were additive inverses.  Hence, $t_l \equiv 0$ in this case.
+
+However, we still have to worry about the case of a false positive, i.e. it is possible for $q$ to be a square mod $l$ but 
+$(x^{q^2},y^{q^2})  = -\overline{q}(x,y)$ nonetheless.  It is sufficient to check whether or not either square root $\pm w$ satisfies 
+$\pi(P) = \pm wP$, for $P \in  \overline{E}[l]\setminus\{P_\infty\}$, hence 
+leading to the factorization of the characteristic equation for $\pi$ as in (\ref{factchar}).   
+
+The simple calculation of $$\gcd(\mathrm{numerator}(x^q-x_w),\phi_l)$$ and the test of whether or not it is $1$ suffices.
+We have $\pi(P) = \pm wP$ for some $P \in  \overline{E}[l]\setminus\{P_\infty\}$ if and only if the gcd $\not = 1$.
+
+\subsection{Case of l=2} \label{Case22}
+
+Note that the above description actually works only for odd $l \not
+= p$. However, we can also run an analogous procedure for $l=2$.
+This allows us to choose set $S$ to contain slightly smaller primes.
+Since we assume $q$ odd, $$q+1 - t \equiv t (\mathrm{mod~}2)$$ and
+in particular, $t_2 \equiv 0 ~($mod $2)$ if and only if $E(\f_q)$
+has an element of order $2$.  By definition of $\oplus$, any element
+of order $2$ must be of the form $(x_0,0)$.  Thus $t_2 \equiv 0
+~($mod $2)$ if and only if $x^3+Ax+B$ has a root in $\f_q$.  An
+efficient way to check this is by taking the gcd$(x^q-x, x^3+Ax+B)$.
+Here we compute $x^q$ efficiently by taking successive squares
+modulo $x^3+Ax+B$.  In summary $t_2 \equiv 0$ if and only if
+gcd$(x^q-x, x^3+Ax+B) \not = 1.$
+
+\subsection{Summary}
+We can summarize the procedure as follows:
+
+1) Choose a set of primes $S$, with $p \not\in S$ such that $\prod_{l \in S} l > 4\sqrt{q}$.
+
+2) For $l = 2$, we find $t_l \equiv 0$ if and only if gcd$(x^q-x, x^3+Ax+B) \not = 1.$
+
+3) For $l \in S\setminus\{2\}$, do the following:
+
+\hspace{2em} a) Let $\overline{q}$ be the unique integer satisfying $\overline{q} \equiv q$ (mod $l$) and $|\overline{q}|< {l \over 2}$.
+
+\hspace{2em} b) Compute univariate rational function $x^\prime$ as defined above.  We can even work  modulo $\psi_l$ so we can use polynomials of 
+bounded degree instead.
+
+\hspace{2em} c) For $\overline{t} \in \{1,2,\dots, {l-1\over 2}\}$ do:
+
+\hspace{4em}   ~i) Check if $x^\prime - x_{\overline{t}}^q \equiv 0$ modulo $\psi_l$.  If so, go to step (ii).  Otherwise, try the next value of 
+$\overline{t}$.  If you have unsuccessfully tried ${l-1\over 2}$, go to step (d) instead. 
+
+\hspace{4em}  ii) Check whether or not $(y^\prime-y_{\overline{t}}^q)/y \equiv 0$ modulo $\psi_l$.  If so, then $t_l \equiv \overline{t}$.  Otherwise, 
+$t_l \equiv -\overline{t}$. 
+
+\hspace{2em} d) Find $q$'s square roots modulo $l$, if they exist.  If they don't exist then $t_l \equiv 0$.  Otherwise write $q \equiv w^2$ (mod $l$).  
+
+\hspace{2em} e) Check whether or not gcd(numerator($x^q-x_w),\psi_l)=1$.  If so, $t_l \equiv 0$.  Otherwise go to step (f).
+
+\hspace{2em} f) Check whether or not gcd(numerator($(y^q-y_w)/y),\psi_l)=1$.  If this gcd is $1$, then $t_l \equiv -2w$.  Otherwise, $t_l \equiv 2w$.
+
+4) We now have computed $t_l$ for all $l \in S$.  Thus we know $|E(\f_q)| \equiv 1 + q - t_l ~($mod $l$) for every $l$ in $S$.  
+Using the Chinese Remainder 
+Theorem, we obtain $|E(\f_q)|$ modulo $N$, where $N = \prod_{l\in S} l$.  
+Since set $S$ was chosen so that $N > 4\sqrt{q}$, by Hasse's theorem, we in fact know 
+$|E(\f_q)|$ precisely.
+\vspace{1em}
+
+As described in the introduction, Schoof's algorithm was a huge
+improvement over previous methods, having an asymptotic running
+times of $(\log q)^8$.  In the 1990's Noam Elkies discovered an
+improvement to this algorithm that yields a faster running time. The
+trick is to restrict set $S$ to primes of a certain type, now known
+as Elkies primes, and to use modular polynomials instead of division
+polynomials.  Before describing this improvement, we will first
+introduce modular polynomials.
+
+\section{Modular Polynomials}
+
+Modular Polynomials come from the theory of modular forms and an
+interpretation of elliptic curves over $\C$ as lattices.  Being a
+lattice, the matrix group $SL_2(\z)$ naturally acts on $\C/(\z +
+\z\tau)$.  Two lattices are considered to be equivalent if there is a natural way to re-scale
+and rotate one to get the other. It turns out that two elliptic
+curves are isomorphic as groups if their associated $\C$-lattices
+are equivalent.  Thus a certain invariant, known as the {\bf
+$j$-invariant}, of lattice theory is in fact an invariant of
+isomorphic elliptic curves as well.  For $E$ given in
+Weierstra\ss~form (\ref{WeEq}), we have $$j(E) =1728{4A^3 \over 4A^3
++ 27B^2}.$$
+
+\subsection{Thinking in terms of cosets}
+
+We will now go back and forth between $j(E)$ and $j(z)$, where we
+use $j(z)$ to refer to the $j$-invariant of a lattice with basis
+$\{\omega_1,\omega_2\}$ such that $z = {\omega_1 \over \omega_2} \in
+\C$.  The matrix groups $GL_2(\z)$ and $SL_2(\z)$ naturally act on
+$\C$ so it makes sense to use notation such as $j(M\cdot z)$ for $M
+\in GL_2(\z)$ or $SL_2(\z)$.
+
+\begin{Prop} \cite{Stark}
+If $M$ is a $2\times 2$ integer matrix with $\det M = m  \in
+\z_{>0}$ then $j(M\cdot z)$ and $j(z)$ are algebraically related,
+meaning there exists a bivariate polynomial $\Phi_m(x,y) \in
+\z[x,y]$ such that $\Phi_m\bigg(j(M\cdot z), j(z)\bigg) = 0$.
+\end{Prop}
+
+\begin{proof} (Sketch)
+
+
+%Supposing that $M$ is in upper-triangular form, which implies $$M =\bigg(\begin{matrix}a~b \\ 0~d
+%\end{matrix}\bigg) \mathrm{~~where~}ad = m.$$
+
+If we consider the group $M_m$ of all matrices of determinant $m$,
+we obtain that $M_m$ has a left-coset decomposition as
+$$M_m = \bigcup_{a,b,d} SL_2(\z)\cdot \bigg(\begin{matrix}a~b \\ 0~d\end{matrix}\bigg)$$ where we add the
+restrictions $a > 0,~ d > 0,~ ad = m,$ and $0 \leq b < d$.
+
+Since the set of $j$-invariants $$\bigg\{j(B\cdot z) ~ :~ B \in
+M_m\bigg\} = \bigg\{j(BA\cdot z) ~ :~ B \in M_m\bigg\}
+\mathrm{~for~}A\in SL_2(\z),$$ we find that
+$$\Phi_m(x,j(z)) = \prod_{M\in M_m} \bigg(x- j(M\cdot z)\bigg) = \bigg(x - j\bigg({az + c \over d}\bigg)\bigg)$$
+satisfies the desired properties.  Note that it can be shown that this polynomial is integral.
+\end{proof}
+
+%\begin{Prop} The cardinality of $M_m$ is $n\prod_{p|n} (1+{1\over p})$ hence we obtain the degree
+%of $\Phi_m$ equals  $$2\sum_{\stackrel{c|m}{c > \sqrt{m}}} c + \delta_{\sqrt{m}}\cdot(\sqrt{m}-1)$$
+%where $\delta_{\sqrt{m}} = 1$ if $m$ is a perfect square and equals $0$ otherwise.
+%\end{Prop}
+
+%\begin{proof}
+%FROM \cite[Nov. 7]{Stark}
+%\end{proof}
+
+%HERE, I SHOW/SUMMARIZE THAT it makes sense to define a group
+
+%$$S_n^* = \bigg\{\bigg(
+%\begin{matrix}a~b \\ 0~d
+%\end{matrix}
+%\bigg) \in D_n^* : d > 0,~0 \leq b < d\bigg\}$$ with cardinality $n\prod_{p|n} (1+{1\over p})$
+%and polynomial
+
+%$$\Phi_n(x,j) = \prod_{\alpha \in S_n^*} (x-j\cdot \alpha),$$ a polynomial in $\z[x,j]$ which is symmetric in each variable, and degree
+%$\# S_n^*$ in both variables.  This is known as a/the {\bf modular polynomial}.  My main sources are \cite{Blake} and \cite{Stark}.%
+
+%The polynomials $\Phi_n(x,j)$ have the remarkable property, known as the {\bf Kronecker congruence relation} that
+%$$\Phi_l(x,y) \equiv (x^l-y)(x-y^l) \mathrm{~(mod~}l).$$
+
+%The degrees of modular polynomials are only $l+1$ rather the degree of $(l^2-1)/2$ of the divison polynomials.
+
+\section{Sketch of Elkies' Improvement}
+
+Given the characteristic equation for the Frobenius map, $$\pi^2 -
+t\pi + q = 0,$$ we define a prime $l$ to be an {\bf Elkies prime} if
+this equation splits over $\f_l$.  This is equivalent to whether or
+not the discriminant $t^2-4q$ is a square modulo $l$.  We define $l$
+to be an {\bf Atkin prime} if it is not an Elkies prime.
+
+\begin{Rem} Note that the condition of being an Elkies or Atkin prime is
+contingent on the choice of curve $E$ and field $\f_q$ which
+determine a specific characteristic equation for $\pi$.  Since we
+have assumed a fixed choice of $E$ and $\f_q$ all along, we will
+from here on out simply refer to primes $l$ as Elkies or Atkin
+primes, without further specification, for the sake of expository
+convenience.
+\end{Rem}
+
+Since our goal is to compute $t$, which is required to test what
+type a given prime is, this definition has yet to improve the
+algorithm; however this is where the modular polynomial $\Phi_l$ for
+prime $l$ plays a role.  The following deep result plays a key role.
+We omit its proof but please see \cite{Blake} or \cite{Dewaghe} for
+details.
+
+\begin{Prop}
+A prime $l$ is an Elkies prime for curve $E$ over $\f_q$ if and only if $\Phi_l(x,j(E))$ has a root
+for $x \in \f_q$, where $j(E)$ is the $j$-invariant for curve $E$.
+\end{Prop}
+
+It is efficient to test whether or not prime $l$ is an Elkies prime
+or not: we take the gcd of $\Phi_l(x,j(E))$ with $x^q-x$ as in
+Section \ref{Case22}.  If $l$ is not an Elkies prime, we do not
+include it in our set $S$. Furthermore, roughly half the primes are
+Elkies primes (a non-trivial but known fact), so this will not
+increase the size of the primes in $S$ too significantly.  (In all
+this, we always assume that $l \not = 2, p$ where $p$ is the
+characteristic of $\f_q$.)  The added efficiency for computing $t$
+(mod $l$) for only Elkies primes $l$ will dominate the reduced
+efficiency for using larger primes $l$.
+
+In particular, when $l$ is an Elkies prime, we will be able to solve
+the equation $\pi(x,y) = (x^q,y^q) = \lambda(x,y)$ for $\lambda$
+using a degree ${l-1 \over 2}$ factor of the degree ${l^2 - 1 \over
+2}$ division polynomial $\psi_l$.  By virtue of being an Elkies
+prime, the characteristic equation for $\pi$ splits modulo $l$, and
+it follows that
+$$\pi^2 - t\pi + q = (\pi-\lambda t)(\pi - \overline{\lambda}t)$$
+such that $\lambda\overline{\lambda}=q$.  Consequently, $$t_l \equiv
+\lambda + {q \over \lambda} ~(\mathrm{mod~}l).$$
+
+Thus to compute $t_l$, it is sufficient to compute an eigenvalue
+$\lambda \in \{1,2,\dots,l-1\}$ of the Frobenius map, and hence that
+is now our current goal.
+%When $l$ is an Elkies prime, this can be accomplished by using a
+%degree $(l-1)/2$ of the division polynomial $\psi_l$.
+For this purpose, we consider a cyclic subgroup of $E(\f_q)$, which
+we denote by $C$ which is fixed by the action of the Frobenius map.
+Thus the polynomial
+$$F_l(x) = \prod_{\pm P_i \in C \setminus \{P_\infty\}} (x- (P_i)_X)$$ has integral coefficients, hence
+is defined over $\f_q$.  Here this product is meant to only include
+one out of each of the pairs $\pm P_i$, since both have the same
+$x$-coordinate.  The notation $(P_i)_X$ signifies the $x$-coordinate
+of point $P_i$.  Note that there are efficient methods for
+explicitly computing $F_l(x)$, we refer the reader to Section VIII.4
+of \cite{Blake}.
+
+We now can work modulo $F_l(x)$ instead of modulo $\psi_l$ which has
+smaller degree, ${l-1 \over 2}$, hence is more efficient; i.e.
+instead of needing to solve equation (\ref{Eqtosol}), it suffices to
+solve
+\begin{eqnarray} x^\prime - x^q_{\lambda} \equiv 0 ~(\mathrm{mod~}F_l)\end{eqnarray} for
+$\lambda$.
+%To compute $t$ (mod $l$) for an Elkies prime, we utilize the fact that if $x=\alpha \in \f_q$ is a
+%root of $\Phi_l(x,j(E))$, then it follows that $\alpha$
+
+We end with the note that Atkin's improvement involves the efficient
+extraction of information about $t_l$ even for $l$ a non-Elkies
+prime, i.e. an Atkin prime.  However the description of this
+algorithm is a topic for another day.  Please see \cite{Blake} or
+\cite{Schoof2} for details.
+
+
+
+%FILL IN HOW WE COMPUTE $t$ (mod $l$) FOR AN ELKIES PRIME!!!
+%
+%\vspace{30em}
+%For roughly half the primes, property FILL IN holds.  Such a prime
+%is now known in the literature as an Elkies prime.
+
+%For such a prime, we can work with modular polynomials instead of division polynomials to solve equations analogous to (\ref{Eqtosol}) for
+%$\overline{t}$.  Since modular polynomials have roughly half the degree of division polynomials, this leads to a speed-up of the algorithm.
+
+%MORE DETAIL NEEDED.
+
+%Also, it is not a problem that all primes are not Elkies primes
+%since we just choose set $S$ accordingly.
+
+
+%EXAMPLE
+
+
+
+
+\begin{thebibliography}{99}
+
+\bibitem{Blake} I. Blake, G. Seroussi, and N. Smart.  \emph{Elliptic Curves in Crytography}, volume 265 of 
+\emph{London Mathematical Society Lecture Note Series}.  Cambridge University Press, Cambridge, 2000.  Reprint of the 1999 original.
+
+\bibitem{Dewaghe} L. Dewaghe.  Remarks on the Schoof-Elkies-Atkin Algorithm. \emph{Math. Comp.,} 
+{\bf 67}(223):1247-1252, 1998.
+
+\bibitem{CRT}  D. Dummit and R. Foote.  \emph{Abstract Algebra, 2nd Edition.}  Prentice Hall, Upper Saddle River, 1999.
+
+\bibitem{Enge} A. Enge. \emph{Elliptic Curves and their Applications to Cryptography: An Introduction.}  
+Kluwer Academic Publishers, Dordrecht, 1999.
+
+\bibitem{Harris} N. Harris.  \emph{Math 168 Project.} University of California, San Diego, Fall 2005.
+
+\bibitem{Lang} S. Lang. \emph{Elliptic Curves: Diophantine Analysis.} Springer-Verlag, Berlin, 1978.
+
+\bibitem{PariImp}
+http://pari.math.u-bordeaux.fr/archives/pari-announce-05/msg00002.html
+
+\bibitem{Schoof1} R. Schoof.  Elliptic Curves over Finite Fields and the Computation of Square Roots mod $p$. \emph{Math. Comp.,} 
+{\bf 44}(170):483-494, 1985.
+
+\bibitem{Schoof2} R. Schoof.  Counting Points on Elliptic Curves over Finite Fields. \emph{J. Th\`eor. Nombres Bordeaux} {\bf 7}:219-254, 1995.
+
+\bibitem{Stark} H. Stark. \emph{Lecture notes for Math 204.} University of California, San Diego, Fall 2005.
+
+\bibitem{Wash} L. C. Washington, \emph{Elliptic Curves: Number Theory and Cryptography}.  Chapman \& Hall/CRC, New York, 2003.
+
+\end{thebibliography}
+
+\end{document}

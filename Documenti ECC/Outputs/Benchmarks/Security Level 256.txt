@@ -1,0 +1,51 @@
+Curva brainpoolP512r1, proprietario: Brainpool
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+1657891012
+1465134497
+1421355433
+1600539659
+1702177236
+1513871837
+1617795053
+1552264578
+1448134393
+1731060096
+Totale impegato: 15710999502
+Media: 1,57 secondi
+
+
+Curva secp521r1, proprietario: Certicom
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+3940486591
+3743889605
+3805184487
+3790272459
+3684963748
+3661058834
+3763653430
+3610982183
+3465923033
+3551068093
+Totale impegato: 37018245768
+Media: 3,70 secondi
+
+
+Curva P521, proprietario: NIST
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+3640436345
+3619910927
+3765315596
+3651026399
+3789829443
+3570765636
+3254314383
+3289836071
+3453456146
+3362403919
+Totale impegato: 35398044058
+Media: 3,54 secondi
+
+

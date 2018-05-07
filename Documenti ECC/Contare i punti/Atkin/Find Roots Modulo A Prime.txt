@@ -1,0 +1,58 @@
+/* Questo pezzo di codice viene da atkin249.cpp, riga 2118 */
+
+
+/*
+ Algorithm 1.6.1 (Roots Mod p). See "A Course
+ in Computational Algebraic Number Theory" by
+ Henri Cohen page 37.
+ */
+void FindRootsModuloAPrime(long degreeP, mpz_class p, mpz_class *P, mpz_class *root, long *rootSize)
+{
+	long i, j;
+	mpz_class t;
+	mpz_t zp, zA[POLY_SIZE], zroot[POLY_SIZE];
+	
+	mpz_init(zp);
+	
+	for (i = 0; i < POLY_SIZE; i++) {
+		mpz_init(zA[i]);
+		mpz_init(zroot[i]);
+	}
+	
+	mpz_set(zp, p.get_mpz_t());
+	
+	for (i = 0; i < POLY_SIZE; i++) {
+		mpz_set(zA[i], P[i].get_mpz_t());
+		mpz_set(zroot[i], root[i].get_mpz_t());
+	}
+	
+	*rootSize = 0;
+	
+    Recurse(degreeP, &zp, zA, zroot, rootSize);
+	
+	for (i = 0; i < POLY_SIZE; i++) {
+		mpz_class temp_class(zA[i]);
+		P[i] = temp_class;
+		mpz_class temp_class2(zroot[i]);
+		root[i] = temp_class2;
+	}
+	
+    /* sort the roots using selection sort */
+    for (i = 0; i < *rootSize - 1; i++) {
+		for (j = i + 1; j < *rootSize; j++) {
+			if (root[i] > root[j]) {
+				t = root[i];
+				root[i] = root[j];
+				root[j] = t;
+			}
+		}
+    }
+	
+	mpz_clear(zp);
+	for (i = 0; i < POLY_SIZE; i++) {
+		mpz_clear(zA[i]);
+		mpz_clear(zroot[i]);
+	}
+	
+	
+}

@@ -1,0 +1,534 @@
+package GUI;
+
+import java.awt.Component;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import org.eclipse.wb.swing.FocusTraversalOnArray;
+import Curve.Curve;
+import Curve.NIST;
+
+public class C_NIST extends MenuCurve
+{
+
+	/** Used to switch panels inside the "NIST" curves selection */
+	private static JPanel activePanel;
+	
+
+	public static void addNIST(JFrame frame, JPanel panel_Menu, JPanel panel_Curve)
+	{
+
+		//Security level 112 bits, curve P-192
+		
+		JPanel panel_NIST80 = new JPanel();
+		frame.getContentPane().add(panel_NIST80, "name_16678413898624");
+		frame.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{frame.getContentPane()}));
+		panel_NIST80.setLayout(null);
+		
+		//Adds this panel to the Curve menu panel
+		JButton Nist = new JButton("NIST");
+		C_NIST.switchPanels(Nist, panel_NIST80, panel_Curve);
+		Nist.setBounds(96, 75, 180, 50);
+		panel_Curve.add(Nist);
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST80);
+		
+		Curve n = new NIST(80);
+		C_NIST.printCurveParams(n, panel_NIST80);
+		
+
+
+		//Security level 112 bits, curve P-224
+
+		JPanel panel_NIST112 = new JPanel();
+		frame.getContentPane().add(panel_NIST112, "name_23682750144538");
+		panel_NIST112.setLayout(null);
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST112);
+
+		n = new NIST(112);
+		C_NIST.printCurveParams(n, panel_NIST112);
+		
+		
+
+
+		//Security level 128 bits, curve P-256
+		
+		JPanel panel_NIST128 = new JPanel();
+		frame.getContentPane().add(panel_NIST128, "name_1336481112404");
+		panel_NIST128.setLayout(null); 
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST128);
+
+		n = new NIST(128);
+		C_NIST.printCurveParams(n, panel_NIST128);
+		
+
+		
+		//Security level 192 bits, curve P-384
+		
+		JPanel panel_NIST192 = new JPanel();
+		frame.getContentPane().add(panel_NIST192, "name_1336481112404");
+		panel_NIST192.setLayout(null); 
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST192);
+
+		n = new NIST(192); 
+		C_NIST.printCurveParams(n, panel_NIST192);
+		
+
+		
+		//Security level 256 bits, curve P-521
+		
+		JPanel panel_NIST256 = new JPanel();
+		frame.getContentPane().add(panel_NIST256, "name_1336481112404");
+		panel_NIST256.setLayout(null); 
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST256);
+
+		n = new NIST(256);
+		C_NIST.printCurveParams(n, panel_NIST256);
+		
+		
+		
+		
+		
+		
+
+		JButton Nist80 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80, panel_NIST80, activePanel);
+		Nist80.setBounds(10, 50, 89, 50);
+		panel_NIST80.add(Nist80);
+		
+		JButton Nist112 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112, panel_NIST112, activePanel);
+		Nist112.setBounds(110, 50, 89, 50);
+		panel_NIST80.add(Nist112);
+
+		JButton Nist128 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128, panel_NIST128, activePanel);
+		Nist128.setBounds(210, 50, 89, 50);
+		panel_NIST80.add(Nist128);
+
+		JButton Nist192 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192, panel_NIST192, activePanel);
+		Nist192.setBounds(310, 50, 89, 50);
+		panel_NIST80.add(Nist192);
+
+		JButton Nist256 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256, panel_NIST256, activePanel);
+		Nist256.setBounds(410, 50, 89, 50);
+		panel_NIST80.add(Nist256);
+
+		
+		
+		
+		
+		JButton Nist80_112 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_112, panel_NIST80, activePanel);
+		Nist80_112.setBounds(10, 50, 89, 50);
+		panel_NIST112.add(Nist80_112);
+		
+		JButton Nist112_112 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_112, panel_NIST112, activePanel);
+		Nist112_112.setBounds(110, 50, 89, 50);
+		panel_NIST112.add(Nist112_112);
+
+		JButton Nist128_112 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_112, panel_NIST128, activePanel);
+		Nist128_112.setBounds(210, 50, 89, 50);
+		panel_NIST112.add(Nist128_112);
+
+		JButton Nist192_112 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_112, panel_NIST192, activePanel);
+		Nist192_112.setBounds(310, 50, 89, 50);
+		panel_NIST112.add(Nist192_112);
+
+		JButton Nist256_112 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_112, panel_NIST256, activePanel);
+		Nist256_112.setBounds(410, 50, 89, 50);
+		panel_NIST112.add(Nist256_112);
+		
+		
+		
+		
+		JButton Nist80_128 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_128, panel_NIST80, activePanel);
+		Nist80_128.setBounds(10, 50, 89, 50);
+		panel_NIST128.add(Nist80_128);
+		
+		JButton Nist112_128 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_128, panel_NIST112, activePanel);
+		Nist112_128.setBounds(110, 50, 89, 50);
+		panel_NIST128.add(Nist112_128);
+
+		JButton Nist128_128 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_128, panel_NIST128, activePanel);
+		Nist128_128.setBounds(210, 50, 89, 50);
+		panel_NIST128.add(Nist128_128);
+
+		JButton Nist192_128 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_128, panel_NIST192, activePanel);
+		Nist192_128.setBounds(310, 50, 89, 50);
+		panel_NIST128.add(Nist192_128);
+
+		JButton Nist256_128 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_128, panel_NIST256, activePanel);
+		Nist256_128.setBounds(410, 50, 89, 50);
+		panel_NIST128.add(Nist256_128);
+		
+		
+		
+		
+		JButton Nist80_192 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_192, panel_NIST80, activePanel);
+		Nist80_192.setBounds(10, 50, 89, 50);
+		panel_NIST192.add(Nist80_192);
+		
+		JButton Nist112_192 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_192, panel_NIST112, activePanel);
+		Nist112_192.setBounds(110, 50, 89, 50);
+		panel_NIST192.add(Nist112_192);
+
+		JButton Nist128_192 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_192, panel_NIST128, activePanel);
+		Nist128_192.setBounds(210, 50, 89, 50);
+		panel_NIST192.add(Nist128_192);
+
+		JButton Nist192_192 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_192, panel_NIST192, activePanel);
+		Nist192_192.setBounds(310, 50, 89, 50);
+		panel_NIST192.add(Nist192_192);
+
+		JButton Nist256_192 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_192, panel_NIST256, activePanel);
+		Nist256_192.setBounds(410, 50, 89, 50);
+		panel_NIST192.add(Nist256_192);
+		
+		
+		
+		
+		JButton Nist80_256 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_256, panel_NIST80, activePanel);
+		Nist80_256.setBounds(10, 50, 89, 50);
+		panel_NIST256.add(Nist80_256);
+		
+		JButton Nist112_256 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_256, panel_NIST112, activePanel);
+		Nist112_256.setBounds(110, 50, 89, 50);
+		panel_NIST256.add(Nist112_256);
+
+		JButton Nist128_256 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_256, panel_NIST128, activePanel);
+		Nist128_256.setBounds(210, 50, 89, 50);
+		panel_NIST256.add(Nist128_256);
+
+		JButton Nist192_256 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_256, panel_NIST192, activePanel);
+		Nist192_256.setBounds(310, 50, 89, 50);
+		panel_NIST256.add(Nist192_256);
+
+		JButton Nist256_256 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_256, panel_NIST256, activePanel);
+		Nist256_256.setBounds(410, 50, 89, 50);
+		panel_NIST256.add(Nist256_256);
+	}
+	
+	
+	/* Original
+	 * 
+	 *
+	public static void addNIST(JFrame frame, JPanel panel_Menu, JPanel panel_Curve)
+	{
+
+		//Security level 112 bits, curve P-192
+		
+		JPanel panel_NIST80 = new JPanel();
+		frame.getContentPane().add(panel_NIST80, "name_16678413898624");
+		frame.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{frame.getContentPane()}));
+		panel_NIST80.setLayout(null);
+		
+		//Adds this panel to the Curve menu panel
+		JButton Nist = new JButton("NIST");
+		C_NIST.switchPanels(Nist, panel_NIST80, panel_Curve);
+		Nist.setBounds(96, 75, 180, 50);
+		panel_Curve.add(Nist);
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST80);
+		
+		Curve n = new NIST(80);
+		C_NIST.printCurveParams(n, panel_NIST80);
+		
+
+
+		//Security level 112 bits, curve P-224
+
+		JPanel panel_NIST112 = new JPanel();
+		frame.getContentPane().add(panel_NIST112, "name_23682750144538");
+		panel_NIST112.setLayout(null);
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST112);
+
+		n = new NIST(112);
+		C_NIST.printCurveParams(n, panel_NIST112);
+		
+		
+
+
+		//Security level 128 bits, curve P-256
+		
+		JPanel panel_NIST128 = new JPanel();
+		frame.getContentPane().add(panel_NIST128, "name_1336481112404");
+		panel_NIST128.setLayout(null); 
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST128);
+
+		n = new NIST(128);
+		C_NIST.printCurveParams(n, panel_NIST128);
+		
+
+		
+		//Security level 192 bits, curve P-384
+		
+		JPanel panel_NIST192 = new JPanel();
+		frame.getContentPane().add(panel_NIST192, "name_1336481112404");
+		panel_NIST192.setLayout(null); 
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST192);
+
+		n = new NIST(192); 
+		C_NIST.printCurveParams(n, panel_NIST192);
+		
+
+		
+		//Security level 256 bits, curve P-521
+		
+		JPanel panel_NIST256 = new JPanel();
+		frame.getContentPane().add(panel_NIST256, "name_1336481112404");
+		panel_NIST256.setLayout(null); 
+		
+		C_NIST.addBackButton(panel_Curve, panel_NIST256);
+
+		n = new NIST(256);
+		C_NIST.printCurveParams(n, panel_NIST256);
+		
+		
+		
+		
+		
+		
+
+		JButton Nist80 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80, panel_NIST80, activePanel);
+		Nist80.setBounds(10, 50, 89, 50);
+		panel_NIST80.add(Nist80);
+		
+		JButton Nist112 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112, panel_NIST112, activePanel);
+		Nist112.setBounds(110, 50, 89, 50);
+		panel_NIST80.add(Nist112);
+
+		JButton Nist128 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128, panel_NIST128, activePanel);
+		Nist128.setBounds(210, 50, 89, 50);
+		panel_NIST80.add(Nist128);
+
+		JButton Nist192 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192, panel_NIST192, activePanel);
+		Nist192.setBounds(310, 50, 89, 50);
+		panel_NIST80.add(Nist192);
+
+		JButton Nist256 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256, panel_NIST256, activePanel);
+		Nist256.setBounds(410, 50, 89, 50);
+		panel_NIST80.add(Nist256);
+
+		
+		
+		
+		
+		JButton Nist80_112 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_112, panel_NIST80, activePanel);
+		Nist80_112.setBounds(10, 50, 89, 50);
+		panel_NIST112.add(Nist80_112);
+		
+		JButton Nist112_112 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_112, panel_NIST112, activePanel);
+		Nist112_112.setBounds(110, 50, 89, 50);
+		panel_NIST112.add(Nist112_112);
+
+		JButton Nist128_112 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_112, panel_NIST128, activePanel);
+		Nist128_112.setBounds(210, 50, 89, 50);
+		panel_NIST112.add(Nist128_112);
+
+		JButton Nist192_112 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_112, panel_NIST192, activePanel);
+		Nist192_112.setBounds(310, 50, 89, 50);
+		panel_NIST112.add(Nist192_112);
+
+		JButton Nist256_112 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_112, panel_NIST256, activePanel);
+		Nist256_112.setBounds(410, 50, 89, 50);
+		panel_NIST112.add(Nist256_112);
+		
+		
+		
+		
+		JButton Nist80_128 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_128, panel_NIST80, activePanel);
+		Nist80_128.setBounds(10, 50, 89, 50);
+		panel_NIST128.add(Nist80_128);
+		
+		JButton Nist112_128 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_128, panel_NIST112, activePanel);
+		Nist112_128.setBounds(110, 50, 89, 50);
+		panel_NIST128.add(Nist112_128);
+
+		JButton Nist128_128 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_128, panel_NIST128, activePanel);
+		Nist128_128.setBounds(210, 50, 89, 50);
+		panel_NIST128.add(Nist128_128);
+
+		JButton Nist192_128 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_128, panel_NIST192, activePanel);
+		Nist192_128.setBounds(310, 50, 89, 50);
+		panel_NIST128.add(Nist192_128);
+
+		JButton Nist256_128 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_128, panel_NIST256, activePanel);
+		Nist256_128.setBounds(410, 50, 89, 50);
+		panel_NIST128.add(Nist256_128);
+		
+		
+		
+		
+		JButton Nist80_192 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_192, panel_NIST80, activePanel);
+		Nist80_192.setBounds(10, 50, 89, 50);
+		panel_NIST192.add(Nist80_192);
+		
+		JButton Nist112_192 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_192, panel_NIST112, activePanel);
+		Nist112_192.setBounds(110, 50, 89, 50);
+		panel_NIST192.add(Nist112_192);
+
+		JButton Nist128_192 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_192, panel_NIST128, activePanel);
+		Nist128_192.setBounds(210, 50, 89, 50);
+		panel_NIST192.add(Nist128_192);
+
+		JButton Nist192_192 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_192, panel_NIST192, activePanel);
+		Nist192_192.setBounds(310, 50, 89, 50);
+		panel_NIST192.add(Nist192_192);
+
+		JButton Nist256_192 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_192, panel_NIST256, activePanel);
+		Nist256_192.setBounds(410, 50, 89, 50);
+		panel_NIST192.add(Nist256_192);
+		
+		
+		
+		
+		JButton Nist80_256 = new JButton("P-192");
+		C_NIST.switchPanels(Nist80_256, panel_NIST80, activePanel);
+		Nist80_256.setBounds(10, 50, 89, 50);
+		panel_NIST256.add(Nist80_256);
+		
+		JButton Nist112_256 = new JButton("P-224");
+		C_NIST.switchPanels(Nist112_256, panel_NIST112, activePanel);
+		Nist112_256.setBounds(110, 50, 89, 50);
+		panel_NIST256.add(Nist112_256);
+
+		JButton Nist128_256 = new JButton("P-256");
+		C_NIST.switchPanels(Nist128_256, panel_NIST128, activePanel);
+		Nist128_256.setBounds(210, 50, 89, 50);
+		panel_NIST256.add(Nist128_256);
+
+		JButton Nist192_256 = new JButton("P-384");
+		C_NIST.switchPanels(Nist192_256, panel_NIST192, activePanel);
+		Nist192_256.setBounds(310, 50, 89, 50);
+		panel_NIST256.add(Nist192_256);
+
+		JButton Nist256_256 = new JButton("P-521");
+		C_NIST.switchPanels(Nist256_256, panel_NIST256, activePanel);
+		Nist256_256.setBounds(410, 50, 89, 50);
+		panel_NIST256.add(Nist256_256);
+	}
+	
+	/**/
+	
+	
+	/**
+	 * This will interchange two different panels during the navigation.
+	 * Moreover, this function enables to switch between panels inside the same parent panel
+	 * 
+	 * @param btn A JButton variable which will enable to switch between the two panels
+	 * @param toShow The panel to show
+	 * @param toHide The panel to hide
+	 */
+	protected static void switchPanels(JButton btn, JPanel toShow, JPanel toHide)
+	{
+		OldButBrass.switchPanels(btn, toShow, toHide);
+		activePanel = toShow;
+	}
+
+	
+	/**
+	 * Generates text areas for the defined panel in order to show the curve's parameters
+	 * @param c The curve to show
+	 */
+	public static void printCurveParams(Curve c, JPanel panelTarget)
+	{
+		JTextArea txtP192p = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192p.setLineWrap(true);
+		txtP192p.setText("p = "+c.get_p());
+		txtP192p.setBounds(20, 112, 791, 30);
+		panelTarget.add(txtP192p);
+		
+		JTextArea txtP192a = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192a.setText("a = "+c.get_a());
+		txtP192a.setBounds(20, 178, 791, 30);
+		panelTarget.add(txtP192a);
+		
+		JTextArea txtP192b = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192b.setText("b = "+c.get_b());
+		txtP192b.setBounds(20, 240, 791, 30);
+		panelTarget.add(txtP192b);
+		
+		JTextArea txtP192xG = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192xG.setText("x = "+c.get_G().getAffineX());
+		txtP192xG.setBounds(20, 302, 791, 30);
+		panelTarget.add(txtP192xG);
+		
+		JTextArea txtP192yG = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192yG.setText("y = "+c.get_G().getAffineY());
+		txtP192yG.setBounds(20, 360, 791, 30);
+		panelTarget.add(txtP192yG);
+		
+		JTextArea txtP192n = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192n.setText("n = "+c.get_n());
+		txtP192n.setBounds(20, 419, 791, 30);
+		panelTarget.add(txtP192n);
+		
+		JTextArea txtP192h = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192h.setText("h = "+c.get_h());
+		txtP192h.setBounds(20, 471, 80, 30);
+		panelTarget.add(txtP192h);
+		
+		JTextArea txtP192L = new JTextArea();
+		txtP192p.setEditable(false);
+		txtP192L.setText("L = "+c.get_L());
+		txtP192L.setBounds(165, 471, 80, 30);
+		panelTarget.add(txtP192L);
+	}
+}

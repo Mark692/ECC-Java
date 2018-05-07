@@ -1,0 +1,70 @@
+Test del protocollo ECDH
+ECDH (Elliptic Curve Diffie Hellman) è un protocollo per l'accordo di una chiave crittografica
+
+Allo scopo immaginiamo due utenti, Alice e Bob, che vogliono scambiarsi messaggi in modo sicuro sulla rete internet
+Il primo passo da compiere è scegliere la curva.
+
+Dettagli sulla curva utilizzata
+Autore: NIST
+Nome: P192
+
+Equazione della curva: y^2 = x^3 + ax + b mod(p)
+a = -3
+b = 2455155546008943817740293915197451784769108058161191238065
+p = 6277101735386680763835789423207666416083908700390324961279
+Punto generatore G = (x, y)
+x = 602046282375688656758213480587526111916698976636884684818
+y = 174050332293622031404857552280219410364023488927386650641
+Ordine n (n*G è il punto all'infinito): 6277101735386680763835789423176059013767194773182842284081
+Cofattore h (n*h è la cardinalità della curva): 1
+Livello di sicurezza = 80 bit
+La curva è buona per applicazioni crittografiche
+
+
+Passiamo ora alla generazione delle chiavi crittografiche:
+Solitamente indicata con "d", la chiave privata è un numero casuale scelto nell'intervallo [1, n-1]
+Alice sceglie: 684595078763492823923252019853458682807180857
+Bob   sceglie: 46681657
+
+La chiave pubblica P è, invece, un punto della curva. Questa viene calcolata come P = d*G:
+Alice ottiene: (3291092501142138291719361153700288347671577099223959824992, 549655250814165729448777653620829194437243294748318504458)
+Bob   ottiene: (409618111879999818183665274356552165637445052890633949061, 2940659032766920486673168008601199013000947984122858141410)
+
+Adesso bisogna scambiare le chiavi pubbliche.
+Una volta scambiate, i due utenti avranno una terna di valori ciascuno:
+Alice ha (d_Alice, P_Alice, P_Bob) mentre Bob ha (d_Bob, P_Bob, P_Alice)
+
+Finalmente è possibile calcolare la chiave simmetrica
+Alice calcola: K = d_Alice * P_Bob = 
+(2205710300232986488733947038558796803279618396213200537813, 3222979383967097161188267640578084231977720377037723072149)
+Bob   calcola: K = d_Bob * P_Alice = 
+(2205710300232986488733947038558796803279618396213200537813, 3222979383967097161188267640578084231977720377037723072149)
+Si noti come le due chiavi corrispondano allo stesso punto della curva
+
+
+Conclusa la generazione della chiave simmetrica è possibile scambiarsi messaggi in modo sicuro.
+Alice vuole mandare un messaggio a Bob
+Il messaggio è: Wow, funziona!
+
+Tramite i parametri a lei noti, Alice può codificare e crittografare ogni carattere del messaggio in punti della curva
+Il messaggio che invierà a Bob è: 
+
+03FE137B349DC6FCF04135592999720E78E7794AA153E85494
+02BEE05ACA4DBF43EC56D71B1D4E9951F4D33ACAE6AEC792B1
+02E1B65B27A6ECDA83F94BFE3A06BDF67CCFFCFEB8BE37B7CC
+02D5BA881B8C6DD346E92A366B04DC0491BAC1B26B3E5CAB48
+0279B2C9E3D1D4A42070AAB65083C3C640109C1BF247D88E9D
+033211627233F409E2FDBC75F4C016DB5F0E225BFC7896158D
+029056D87DFAE58B92157FBA876298764A4EE18615E1803A01
+03F1D0D39B368D3051CEE75F31AC99E2C7E4F13ACE8F385573
+02EC5993D4A45349E435AF4158EA9F1F417830617A7E65E541
+0389B5BFC41C3764146EA7A91299D8709BDBBE63504B1FEF87
+02BEE05ACA4DBF43EC56D71B1D4E9951F4D33ACAE6AEC792B1
+03F1D0D39B368D3051CEE75F31AC99E2C7E4F13ACE8F385573
+03F96EFB468308EFF4E87917E9C68DF811EEC02014ABA98141
+031C985B085C11C67B66817E6C6AC4D2A9D679037E79DFB146
+
+
+Bob riceve il messaggio e può decifrarlo grazie ai parametri a lui noti.
+Il messaggio che ottiene è:
+Wow, funziona!

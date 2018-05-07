@@ -1,0 +1,52 @@
+package GUI;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+
+/**
+ * This class contains basic functions to work with. 
+ * One can use these functions to enhance buttons and panels actions
+ */
+public abstract class OldButBrass
+{
+	
+	/**
+	 * This will interchange two different panels during the navigation
+	 * 
+	 * @param btn A JButton variable which will enable to switch between the two panels
+	 * @param toShow The panel to show
+	 * @param toHide The panel to hide
+	 */
+	protected static void switchPanels(JButton btn, JPanel toShow, JPanel toHide)
+	{
+		if(toShow.equals(toHide) == false) //If the panels are different then you can switch between each other
+		{
+			btn.addActionListener(new ActionListener() 
+			{
+				public void actionPerformed(ActionEvent e) // This will interchange menus (panels)
+				{
+					toHide.setVisible(false);
+					toShow.setVisible(true); //The order of the commands is irrelevant
+				}
+			});
+		} //Otherwise not
+	}
+	
+
+	/**
+	 * This will be generate a "Back" button on the "toHide" panel addressing to the "toShow" panel
+	 * 
+	 * @param toShow The panel to show
+	 * @param toHide The panel to hide
+	 */
+	protected static void addBackButton(JPanel toShow, JPanel toHide)
+	{
+		JButton back = new JButton("Back");
+		OldButBrass.switchPanels(back, toShow, toHide);
+		back.setBounds(10, 11, 89, 23);
+		toHide.add(back);
+	}
+}

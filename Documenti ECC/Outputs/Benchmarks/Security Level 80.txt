@@ -1,0 +1,118 @@
+RSA
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+6374644593
+5689565814
+6678661459
+6186441823
+6130502904
+6532977125
+5942904364
+4935085727
+6518500416
+5974773307
+Totale impegato: 60964809291
+Media: 6,10 secondi
+
+Brainpool
+Curva brainpoolP160r1, proprietario: Brainpool
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+245815400
+254948974
+228314977
+240423089
+220205130
+213294761
+243003787
+233751333
+207870807
+229313047
+Totale impegato: 2317673395
+Media: 0,23 secondi
+
+Certicom - Koblitz
+Curva secp160k1, proprietario: Certicom
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+224363325
+199119099
+240277270
+197302134
+254539740
+217326381
+216053350
+236909749
+220693902
+236181936
+Totale impegato: 2243630680
+Media: 0,22 secondi
+
+Certicom - v2
+Curva secp160r1, proprietario: Certicom
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+202791087
+224065272
+219189529
+260604700
+239522518
+248295606
+226072529
+208528917
+234767363
+246311868
+Totale impegato: 2310970851
+Media: 0,23 secondi
+
+Certicom - v3
+Curva secp160r2, proprietario: Certicom
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+257099484
+251332149
+183862836
+196746226
+231634606
+203822939
+215560730
+210225720
+260412270
+245020451
+Totale impegato: 2256428973
+Media: 0,23 secondi
+
+Microsoft
+Curva null, proprietario: null
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+252986618
+177736726
+197782353
+249335155
+234775061
+217807882
+242460707
+236925570
+212826944
+236011743
+Totale impegato: 2259452687
+Media: 0,23 secondi
+
+NIST
+Curva P192, proprietario: NIST
+Rodaggio iniziale
+Fine rodaggio. Inizio del vero test: 
+330713295
+301106899
+331080621
+375360004
+331430416
+314760435
+327434290
+321470677
+338674757
+378817327
+Totale impegato: 3351586370
+Media: 0,34 secondi
+
