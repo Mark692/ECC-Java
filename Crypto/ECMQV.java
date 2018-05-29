@@ -155,15 +155,14 @@ public class ECMQV
 	 * Encrypts a text
 	 * 
 	 * @param Message Data to be encrypted
-	 * @param A_privates This user's ephemeral private keys
-	 * @param A_publics This user's ephemeral public keys
-	 * @param B_public Recipient's public key (aka Bob's)
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param Alice_publicEPH This user's ephemeral public key
 	 * @param SharedData Optional. Data shared by the two parties
 	 * @return The encrypted text 
 	 */
-	public String encrypt(String Message, BigInteger[] A_privates, ECPoint[] A_publics, ECPoint B_public, String SharedData)
+	public String encrypt(String Message, ECPoint symmetric_Key, ECPoint Alice_publicEPH, String SharedData)
 	{
-		String crypted = ECIES.encryptES(Message, A_privates[1], A_publics[1], B_public, this.get_c(), SharedData);
+		String crypted = this.encryptES(Message, symmetric_Key, Alice_publicEPH, this.get_c(), SharedData);
 		return Strings.baseSwap(crypted, 2, 16);
 	}
 	
@@ -172,31 +171,31 @@ public class ECMQV
 	 * Encrypts a text
 	 * 
 	 * @param Message The hexadecimal notation message to be encrypted
-	 * @param A_privates This user's ephemeral private keys
-	 * @param A_publics This user's ephemeral public keys
-	 * @param B_public Recipient's public key (aka Bob's)
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param Alice_publicEPH This user's ephemeral public key
 	 * @return The encrypted text 
 	 */
-	public String encrypt(String Message, BigInteger[] A_privates, ECPoint[] A_publics, ECPoint B_public)
+	public String encrypt(String Message, ECPoint symmetric_Key, ECPoint Alice_publicEPH)
 	{
-		String crypted = ECIES.encryptES(Message, A_privates[1], A_publics[1], B_public, this.get_c(), "");
+		String crypted = this.encryptES(Message, symmetric_Key, Alice_publicEPH, this.get_c(), "");
 		return Strings.baseSwap(crypted, 2, 16);
 	}
+	
 	
 	
 	/**
 	 * Decrypts a text into its original form
 	 * 
 	 * @param encrypted The encrypted text
-	 * @param Bob_privates This user's private key
-	 * @param Alice_publics Sender's public ephemeral key
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param Alice_publicEPH Sender's public ephemeral key
 	 * @param SharedData Optional. Data shared by the two parties
 	 * @return The decrypted text
 	 */
-	public String decrypt(String encrypted, BigInteger[] Bob_privates, ECPoint[] Alice_publics, String SharedData)
+	public String decrypt(String encrypted, ECPoint symmetric_Key, ECPoint Alice_publicEPH, String SharedData)
 	{
 		encrypted = Strings.baseSwap(encrypted, 16, 2);
-		return ECIES.decryptES(encrypted, Bob_privates[0], Alice_publics[1], this.get_c(), SharedData);
+		return this.decryptES(encrypted, symmetric_Key, Alice_publicEPH, this.get_c(), SharedData);
 	}
 	
 	
@@ -204,32 +203,32 @@ public class ECMQV
 	 * Decrypts a text into its original form
 	 * 
 	 * @param encrypted The encrypted text
-	 * @param Bob_privates This user's private key
-	 * @param Alice_publics Sender's public ephemeral key
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param Alice_publicEPH Sender's public ephemeral key
 	 * @return The decrypted text
 	 */
-	public String decrypt(String encrypted, BigInteger[] Bob_privates, ECPoint[] Alice_publics)
+	public String decrypt(String encrypted, ECPoint symmetric_Key, ECPoint Alice_publicEPH)
 	{
 		encrypted = Strings.baseSwap(encrypted, 16, 2);
-		return ECIES.decryptES(encrypted, Bob_privates[0], Alice_publics[1], this.get_c(), "");
+		return this.decryptES(encrypted, symmetric_Key, Alice_publicEPH, this.get_c(), "");
 	}
+	
 	
 	
 	/**
 	 * Encrypts a message in a more secure way than the standard encryption
 	 * 
 	 * @param Message The message to encrypt
-	 * @param A_privates This user's private keys
-	 * @param A_publics This user's public keys
-	 * @param B_public The recipient's public key
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param A_pubEPH This user's ephemeral public key
 	 * @param MAC_len The length of the MAC tag. It adds a check to the encryption
 	 * @param SharedData1 Optional. Data shared by the two parties
 	 * @param SharedData2 Optional. Data shared by the two parties
 	 * @return The encrypted message
 	 */
-	public String encryptAugmented(String Message, BigInteger[] A_privates, ECPoint[] A_publics, ECPoint B_public, int MAC_len, String SharedData1, String SharedData2)
+	public String encryptAugmented(String Message, ECPoint symmetric_Key, ECPoint A_pubEPH, int MAC_len, String SharedData1, String SharedData2)
 	{
-		String crypted = ECIES.encryptAES(Message, A_privates[1], A_publics[1], B_public, this.get_c(), MAC_len, SharedData1, SharedData2);
+		String crypted = this.encryptAES(Message, symmetric_Key, A_pubEPH, this.get_c(), MAC_len, SharedData1, SharedData2);
 		return Strings.baseSwap(crypted, 2, 16);
 	}
 	
@@ -238,35 +237,34 @@ public class ECMQV
 	 * Encrypts a message in a more secure way than the standard encryption
 	 * 
 	 * @param Message The message to encrypt
-	 * @param A_privates This user's private keys
-	 * @param A_publics This user's public keys
-	 * @param B_public The recipient's public key
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param A_pubEPH This user's ephemeral public key
 	 * @param MAC_len The length of the MAC tag. It adds a check to the encryption
 	 * @return The encrypted message
 	 */
-	public String encryptAugmented(String Message, BigInteger[] A_privates, ECPoint[] A_publics, ECPoint B_public, int MAC_len)
+	public String encryptAugmented(String Message, ECPoint symmetric_Key, ECPoint A_pubEPH, int MAC_len)
 	{
-		String crypted = ECIES.encryptAES(Message, A_privates[1], A_publics[1], B_public, this.get_c(), MAC_len, "", "");
+		String crypted = this.encryptAES(Message, symmetric_Key, A_pubEPH, this.get_c(), MAC_len, "", "");
 		return Strings.baseSwap(crypted, 2, 16);
-		
 	}
+	
 	
 	
 	/**
 	 * Decrypts a text into its original message
 	 * 
 	 * @param encrypted The encrypted message
-	 * @param Bob_privates This user's private keys
-	 * @param A_pubEPH The sender's public key
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param A_pubEPH This user's public ephemeral key
 	 * @param MAC_len The length of the MAC tag. It adds a check to the encryption
 	 * @param SharedData1 Optional. Data shared by the two parties
 	 * @param SharedData2 Optional. Data shared by the two parties
 	 * @return The original message
 	 */
-	public String decryptAugmented(String encrypted, BigInteger[] Bob_privates, ECPoint[] A_publics, int MAC_len,String SharedData1, String SharedData2)
+	public String decryptAugmented(String encrypted, ECPoint symmetric_Key, ECPoint A_pubEPH, int MAC_len,String SharedData1, String SharedData2)
 	{
 		encrypted = Strings.baseSwap(encrypted, 16, 2);
-		return ECIES.decryptAES(encrypted, Bob_privates[0], A_publics[1], this.get_c(), MAC_len, SharedData1, SharedData2);
+		return this.decryptAES(encrypted, symmetric_Key, A_pubEPH, this.get_c(), MAC_len, SharedData1, SharedData2);
 	}
 	
 	
@@ -274,15 +272,15 @@ public class ECMQV
 	 * Decrypts a text into its original message
 	 * 
 	 * @param encrypted The encrypted message
-	 * @param Bob_privates This user's private keys
-	 * @param A_pubEPH The sender's public key
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param A_pubEPH This user's public ephemeral key
 	 * @param MAC_len The length of the MAC tag. It adds a check to the encryption
 	 * @return The original message
 	 */
-	public String decryptAugmented(String encrypted, BigInteger[] Bob_privates, ECPoint A_pubEPH, int MAC_len)
+	public String decryptAugmented(String encrypted, ECPoint symmetric_Key, ECPoint A_pubEPH, int MAC_len)
 	{
 		encrypted = Strings.baseSwap(encrypted, 16, 2);
-		return ECIES.decryptAES(encrypted, Bob_privates[0], A_pubEPH, this.get_c(), MAC_len, "", "");
+		return this.decryptAES(encrypted, symmetric_Key, A_pubEPH, this.get_c(), MAC_len, "", "");
 	}
 	
 
@@ -295,5 +293,170 @@ public class ECMQV
 	private void set_c(Curve c)
 	{
 		this.c = c;
+	}
+	
+	/**
+	 * ANSI X.93 pages 38-39 adapted to ECMQV
+	 * Encrypts a text
+	 * 
+	 * @param Message Data to be encrypted
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param Alice_publicEPH This user's ephemeral public key
+	 * @param c The curve in use for the computations
+	 * @param SharedData Optional. Data shared by the two parties
+	 * @return The encrypted text 
+	 */
+	public String encryptES(String Message, ECPoint symmetric_Key, ECPoint Alice_publicEPH, Curve c, String SharedData)
+	{
+		if(Message == "")
+		{
+			return "";
+		}
+		String A_pubEPH_x = Strings.comprHEX(Alice_publicEPH);
+		A_pubEPH_x = Strings.baseSwap(A_pubEPH_x, 16, 2);
+		
+		String secret_x = Strings.comprHEX(symmetric_Key);
+		secret_x = Strings.string2binary(secret_x);
+
+		Message = Strings.string2binary(Message);
+		int mess_len = Message.length();
+		SharedData = Strings.string2binary(SharedData);
+		String EncKey = ECIES.keyDerivation(secret_x, mess_len, SharedData);
+
+		String encryptedMessage = Strings.xor(Message, EncKey);
+
+		return A_pubEPH_x + encryptedMessage;
+	}
+	
+	
+	/**
+	 * ANSI X.93 pages 38-39 adapted to ECMQV
+	 * Decrypts a text into its original form
+	 * 
+	 * @param encrypted The encrypted text
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param Alice_publicEPH Sender's public ephemeral key
+	 * @param c The curve in use for the computations
+	 * @param SharedData Optional. Data shared by the two parties
+	 * @return The decrypted text
+	 */
+	public String decryptES(String encrypted, ECPoint symmetric_Key, ECPoint Alice_publicEPH, Curve c, String SharedData) 
+	{
+		if(encrypted == "" || encrypted == null)
+		{
+			return "";
+		}
+		String A_pubEPH_x = Strings.comprHEX(Alice_publicEPH);
+		A_pubEPH_x = Strings.baseSwap(A_pubEPH_x, 16, 2);
+		int x_len = A_pubEPH_x.length();
+		
+		String ApEx_received = encrypted.substring(0, x_len);
+		if(ApEx_received.equalsIgnoreCase(A_pubEPH_x) == false)
+		{
+			return null;
+		}
+		
+		int encrypted_len = encrypted.length() - x_len;
+		
+		String secret_x = Strings.comprHEX(symmetric_Key);
+		secret_x = Strings.string2binary(secret_x);
+		
+		SharedData = Strings.string2binary(SharedData);
+		String EncKey = ECIES.keyDerivation(secret_x, encrypted_len, SharedData);
+		String decrypted = Strings.xor(encrypted.substring(x_len), EncKey);
+		
+		return Strings.base2string(decrypted, 2);
+	}
+	
+
+	/**
+	 * ANSI X.93 pages 40-41
+	 * Encrypts a text
+	 * 
+	 * @param Message Data to be encrypted
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param A_pubEPH This user's ephemeral public key
+	 * @param c The curve in use for the computations
+	 * @param MAC_len MacTag's length
+	 * @param SharedData1 Optional. Data shared by the two parties
+	 * @param SharedData2 Optional. Data shared by the two parties
+	 * @return The encrypted text 
+	 */
+	public String encryptAES(String Message, ECPoint symmetric_Key, ECPoint A_pubEPH, Curve c, int MAC_len, String SharedData1, String SharedData2) 
+	{
+		if(Message == "")
+		{
+			return "";
+		}
+		Message = Strings.string2binary(Message);
+		int mess_len = Message.length();
+		String A_pubEPH_x = Strings.comprHEX(A_pubEPH);
+		A_pubEPH_x = Strings.baseSwap(A_pubEPH_x, 16, 2);
+		
+		String secret_x = Strings.comprHEX(symmetric_Key);
+		secret_x = Strings.string2binary(secret_x);
+		
+		SharedData1 = Strings.string2binary(SharedData1);
+		String KeyData = ECIES.keyDerivation(secret_x, mess_len + MAC_len, SharedData1);
+		String EncKey = KeyData.substring(0, mess_len);
+		String MacKey = KeyData.substring(mess_len);
+		String MaskedEncData = Strings.xor(Message, EncKey);
+		SharedData2 = Strings.string2binary(SharedData2);
+		String MacData = MaskedEncData + SharedData2;
+		String MacTag = ECIES.MessageAuthCode_TAG(MacData, MacKey);
+
+		return A_pubEPH_x + MaskedEncData + MacTag;
+	}
+	
+	
+	/**
+	 * ANSI X.93 pages 40-42
+	 * Decrypts a text into its original form
+	 * 
+	 * @param encrypted The encrypted text
+	 * @param symmetric_Key ECMQV Symmetric Key
+	 * @param A_pubEPH This user's public ephemeral key
+	 * @param c The curve in use for the computations
+	 * @param MAC_len MacTag's length
+	 * @param SharedData1 Optional. Data shared by the two parties
+	 * @param SharedData2 Optional. Data shared by the two parties
+	 * @return The decrypted text
+	 */
+	public String decryptAES(String encrypted, ECPoint symmetric_Key, ECPoint A_pubEPH, Curve c, int MAC_len,String SharedData1, String SharedData2) 
+	{
+		if(encrypted == "")
+		{
+			return "";
+		}
+		String A_pubEPH_x = Strings.comprHEX(A_pubEPH);		
+		A_pubEPH_x = Strings.baseSwap(A_pubEPH_x, 16, 2);
+
+		String ApEx_received = encrypted.substring(0, A_pubEPH_x.length());
+		if(ApEx_received.equalsIgnoreCase(A_pubEPH_x) == false)
+		{
+			return null;
+		}
+		
+		int pub_x_len = A_pubEPH_x.length();
+		String MaskedEncData = encrypted.substring(pub_x_len, (encrypted.length() - 160)); //160 = TAG length
+		int MaskedEncData_len = MaskedEncData.length();
+		
+		String secret_x = Strings.comprHEX(symmetric_Key);
+		secret_x = Strings.string2binary(secret_x);
+		
+		SharedData1 = Strings.string2binary(SharedData1);
+		String KeyData = ECIES.keyDerivation(secret_x, MaskedEncData_len + MAC_len, SharedData1);
+		String EncKey = KeyData.substring(0, MaskedEncData_len);
+		String MacKey = KeyData.substring(MaskedEncData_len);
+		String EncData = Strings.xor(MaskedEncData, EncKey);
+		SharedData2 = Strings.string2binary(SharedData2);
+		String checkTag = ECIES.MessageAuthCode_TAG(MaskedEncData + SharedData2, MacKey);
+		String receivedTag = encrypted.substring((encrypted.length() - 160)); //160 = TAG length
+
+		if(receivedTag.compareTo(checkTag) == 0)
+		{
+			return Strings.base2string(EncData, 2);
+		}
+		return null;
 	}
 }

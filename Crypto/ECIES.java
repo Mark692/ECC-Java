@@ -6,10 +6,15 @@ import java.security.spec.ECPoint;
 import Curve.Curve;
 import Utils.Strings;
 
+/**
+ * This class enables basic ECIES to ECDH protocol.
+ * A slightly different version can be found in ECMQV where the symmetric key is computed differently
+ */
 public final class ECIES
 {
 
 	/**
+	 * ANSI X.93 pages 38-39
 	 * Encrypts a text
 	 * 
 	 * @param Message Data to be encrypted
@@ -45,6 +50,7 @@ public final class ECIES
 	
 	
 	/**
+	 * ANSI X.93 pages 38-39
 	 * Decrypts a text into its original form
 	 * 
 	 * @param encrypted The encrypted text
@@ -85,6 +91,7 @@ public final class ECIES
 	
 
 	/**
+	 * ANSI X.93 pages 40-41
 	 * Encrypts a text
 	 * 
 	 * @param Message Data to be encrypted
@@ -126,6 +133,7 @@ public final class ECIES
 	
 	
 	/**
+	 * ANSI X.93 pages 40-42
 	 * Decrypts a text into its original form
 	 * 
 	 * @param encrypted The encrypted text
@@ -249,6 +257,7 @@ public final class ECIES
 	
 	
 	/**
+	 * ANSI X.93 pages 36/37
 	 * Generates a tag for the Message Authentication Code
 	 * 
 	 * @param data The bit string to be MACed
@@ -259,8 +268,11 @@ public final class ECIES
 	{
 		String paddedKey = Strings.leftPad(key, 512);
 		
-		String pad1 = Strings.hex_to512bits("5C");
-		String pad2 = Strings.hex_to512bits("36");
+		//pad1 = Strings.hex_to512bits("5C"); ripetuto 64 volte
+		String pad1 = "01011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100010111000101110001011100"; 
+		
+		//pad2 =  // = Strings.hex_to512bits("36"); ripetuto 64 volte
+		String pad2 = "00110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110001101100011011000110110";
 
 		String keypad1 = Strings.xor(paddedKey, pad1);
 		String keypad2 = Strings.xor(paddedKey, pad2);
