@@ -130,7 +130,7 @@ public class VRandom extends Curve
 	
 	
 	/**
-	 * Generate a VR curve with a random field's cardinality. 
+	 * Generate a random field's cardinality with a given Security Level "L". 
 	 * 
 	 * @param L The security level given for this curve
 	 */
@@ -148,7 +148,7 @@ public class VRandom extends Curve
 	
 	
 	/**
-	 * Generate a VR curve with a random field's cardinality. 
+	 * Generate field's cardinality "p" at random and computes its Security Level "L". 
 	 * The curve's security level will be within 80 and 256 randomly
 	 */
 	private void genSet_pL()
@@ -168,7 +168,7 @@ public class VRandom extends Curve
 		}
 		while(p.bitLength() < min); //... and will stop when p > minval & is (probable)prime
 		
-		//p = new BigInteger(bitsNumber, 2017, entropy) THIS IS ANALOGOUS TO THE CODE ABOVE
+		// p = new BigInteger(bitsNumber, 2017, entropy) THIS IS ANALOGOUS TO THE CODE ABOVE
 		
 		this.set_p(p);
 		this.set_L(p.bitLength() / 2);
@@ -176,6 +176,8 @@ public class VRandom extends Curve
 	
 
 	/**
+	 * ANSI X9.62, page 32, chapter "A.3.3.2 Elliptic curves over Fp"
+	 * 
 	 * Generates a Verifiably Random curve based on the field's cardinality p given
 	 */
 	private void genSet_ab()
@@ -207,8 +209,8 @@ public class VRandom extends Curve
 			c = new BigInteger(Strings.string2binary(h_final), 2); //integer whose binary expansion is given by the bit string h2
 			cond2 = c.multiply(BigInteger.valueOf(4)).add(BigInteger.valueOf(27));
 		} 
-		while(c.compareTo(BigInteger.ZERO) == 0
-				|| cond2.compareTo(BigInteger.ZERO) == 0);
+		while(c.compareTo(BigInteger.ZERO) != 0
+				&& cond2.compareTo(BigInteger.ZERO) != 0);
 
 		BigInteger a = p.subtract(BigInteger.valueOf(3));
 		BigInteger b_squared = a.multiply(c.modInverse(p)).mod(p);
@@ -256,19 +258,19 @@ public class VRandom extends Curve
 		
 		c = new BigInteger(Strings.string2binary(h_final), 2); //integer whose binary expansion is given by the bit string h2
 		cond2 = c.multiply(BigInteger.valueOf(4)).add(BigInteger.valueOf(27));
-		
+
 		//Here comes the importance of the seed. 
 		//If it's invalid this check will set a=0, b=0
-		if(c.compareTo(BigInteger.ZERO) == 0
-			|| cond2.compareTo(BigInteger.ZERO) == 0)
+		if(c.compareTo(BigInteger.ZERO) != 0
+			&& cond2.compareTo(BigInteger.ZERO) != 0)
 		{
 			BigInteger a = p.subtract(BigInteger.valueOf(3));
 			BigInteger b_squared = a.multiply(c.modInverse(p)).mod(p);
 			BigInteger b = Standards.modular_sqrt(b_squared, p);
 			if(b != null)
 			{
-				this.set_a(a);
-				this.set_b(b);
+				this.set_a(a); // = -3
+				this.set_b(b); // = sqrt( a/c mod(p) )
 			}
 			else //The simplest choice is a = c and b = c
 			{
@@ -350,8 +352,8 @@ public class VRandom extends Curve
 
 	private void setSeed(String seed)
 	{
-		this.seed = Strings.hashIt(seed); //MAYBE IT WILL WORK IF SEED HAS 160 BIT LENGTH
-//		this.seed = seed;
+//		this.seed = Strings.hashIt(seed); //MAYBE IT WILL WORK IF SEED HAS 160 BIT LENGTH
+		this.seed = seed;
 	}
 }
 

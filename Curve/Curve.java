@@ -36,9 +36,6 @@ public abstract class Curve
 	
 	/** Verifiably Random's seed. Used to generate VR curves */
 	protected String seed;
-
-	/** Used to divide points from each other during Encoding and Decoding functions */
-	private final String breakpoint = "\r\n";
 	
 	/** Security levels offered by elliptic curves */
 	public static final int SECURITY_LEVEL_56 = 56;
@@ -51,7 +48,7 @@ public abstract class Curve
 	public static final int SECURITY_LEVEL_192 = 192;
 	public static final int SECURITY_LEVEL_256 = 256;
 
-	private boolean isStrong; //It has strong cryptographic parameters
+	private boolean isStrong; //The curve has strong cryptographic parameters
 
 	
 	/**
@@ -142,18 +139,18 @@ public abstract class Curve
 		{
 			this.set_L(L);
 		}
+//		else
+//		{
+//			int binary_p = this.get_p().bitLength();
+//			this.set_L(binary_p/2);
+//		}
 		
 		//Cryptographic tests
-		if(this.h_isSmallEnough() == false
-				|| this.isAnomalous() == true
-				|| this.MOV_Resistant() == false)
-		{
-			this.set_isStrong(false);
-		}
-		else
-		{
-			this.set_isStrong(true);
-		}
+		boolean isStrong =  this.h_isSmallEnough() == false
+						 || this.MOV_Resistant() == false
+						 || this.isAnomalous() == true;
+		 
+		this.set_isStrong(isStrong);
 	}
 	
 	
@@ -432,17 +429,6 @@ public abstract class Curve
 	}
 
 	
-	/**
-	 * Used to retrieve the breakpoint.
-	 * 
-	 * @return The breakpoint
-	 */
-	public String get_breakpoint()
-	{
-		return breakpoint;
-	}
-	
-	
 	//Checks for the curve\\
 	
 
@@ -454,17 +440,31 @@ public abstract class Curve
 	 * @param p The field's cardinality
 	 * @return Whether the curve is smooth or not
 	 */
-	protected boolean is_Smooth(BigInteger a, BigInteger b, BigInteger p)
+	public boolean is_Smooth(BigInteger a, BigInteger b, BigInteger p)
 	{
 		BigInteger a_clause = ((a.pow(3)).multiply(BigInteger.valueOf(4))).mod(p);
 		BigInteger b_clause = ((b.pow(2)).multiply(BigInteger.valueOf(27))).mod(p);
 
-		if(a_clause.compareTo(b_clause) != 0)
-		{
-			return true;
-		}
-		return false;
+		return a_clause.compareTo(b_clause) != 0;
 	}
+	
+
+	/**
+	 * Checks whether the curve is smooth
+	 * 
+	 * @param a The curve's first parameter
+	 * @param b The curve's second parameter
+	 * @param p The field's cardinality
+	 * @return Whether the curve is smooth or not
+	 */
+	protected boolean is_Smooth()
+	{
+		BigInteger a_clause = ((a.pow(3)).multiply(BigInteger.valueOf(4))).mod(p);
+		BigInteger b_clause = ((b.pow(2)).multiply(BigInteger.valueOf(27))).mod(p);
+
+		return a_clause.compareTo(b_clause) != 0;
+	}
+	
 	
 	
 	/**
@@ -553,6 +553,11 @@ public abstract class Curve
 	
 	
 	/**
+	 * ANSI X9.62, page 29, chapter "A.1.2 The Anomalous Condition"
+	 * Quote: "Smart [38] and Satoh and Araki [37] showed that the ECDLP in anomalous curves
+	 * can be efficiently solved. 
+	 * An elliptic curve E defined over Fq is said to be Fq-anomalous if #E(Fq) = q."
+	 * 
 	 * Checks whether the curve has cardinality #E equal to field cardinality p. 
 	 * In this case the curve is said Anomalous and is not suitable for cryptographic purposes
 	 * 
@@ -571,6 +576,8 @@ public abstract class Curve
 	
 	
 	/**
+	 * ANSI X9.62, page 29, chapter "A.1.1 The MOV Condition"
+	 * 
 	 * Checks whether the curve is resistant against MOV attacks.
 	 * To be resistant, n must satisfy the equation p^i != 1 mod(n) for an i >= 20 (ANSI X9.92)
 	 * The choice of i up to 100 is based on Certicom's SEC1 (21/05/2009, version 2.0) 
@@ -688,7 +695,7 @@ public abstract class Curve
 	 * @param p The field's characteristic
 	 * @return An array with min and max bounds for EC's order
 	 */
-	private BigInteger[] Hasse_Interval()
+	public BigInteger[] Hasse_Interval()
 	{
 		BigInteger p = this.get_p();
 		BigInteger two_squaroot = this.sqrt(p).multiply(BigInteger.valueOf(2)); // = 2*sqrt(p)
